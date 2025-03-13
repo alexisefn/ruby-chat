@@ -62,3 +62,5 @@ puts "¡Hasta la próxima!"
 # 3) Contar cuantos caracteres fueron ingresados (especificando letras, números y símbolos)
 # 4) Convertir todo en Mayusculas
 # 5) Convertir todo en Minusculas
+#
+# Este es un test para comprobar si puedo hacer commits desde mi computador
