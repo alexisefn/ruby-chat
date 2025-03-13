@@ -1,4 +1,4 @@
-# hola
+# ¡Hola!
 Registrando mis progresos aprendiendo Ruby.
 
 11/03/2025: Programa creado. Mostrar mensaje ingresado en pantalla <br>
