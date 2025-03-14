@@ -10,16 +10,21 @@ def mostrar_mensaje
   puts "¿Qué quieres hacer con este mensaje? Elige una opción:"
   puts "1) Mostrar mensaje un número de veces"
   puts "2) Mostrar mensaje al revés"
+  puts "3) Contar cuantos caracteres ingresaste"
+  puts "4) Mostrar mensaje en mayusculas"
+  puts "5) Mostrar mensaje en minusculas"
   
   opcion = gets.chomp
-  until opcion == '1' || opcion == '2'
+  until ['1', '2', '3', '4', '5'].include?(opcion)
     puts "Lo siento, no ingresaste una opción válida. Intentalo nuevamente."
     opcion = gets.chomp
   end
-  
-  if opcion == "1"
+
+  case opcion
+    
+  when "1"
     loop do  
-      puts "¿Cuantas veces quieres ver el mensaje?"
+      puts "¿Cuántas veces quieres ver el mensaje?"
       repeticiones = gets.chomp
       numero = repeticiones.to_i
 
@@ -30,8 +35,17 @@ def mostrar_mensaje
         puts "Lo siento, no ingresaste un número válido. Inténtalo nuevamente."
       end
     end
-  elsif opcion == "2"
+  when "2"
     puts "#{mensaje.reverse}"
+  when "3"
+    letras = mensaje.scan(/[a-zA-Z]/).length
+    numeros = mensaje.scan(/\d/).length
+    simbolos = mensaje.scan(/[^\w\s]/).length
+    puts "Has ingresado un total de #{mensaje.length} caracteres: #{letras} letras, #{numeros} números, #{simbolos} símbolos"
+  when "4"
+    puts mensaje == mensaje.upcase ? "El mensaje ya está todo en mayúsculas." : mensaje.upcase
+  when "5"
+    puts mensaje == mensaje.downcase ? "El mensaje ya está todo en minúsculas." : mensaje.downcase
   end
 end
 
