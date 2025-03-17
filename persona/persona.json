@@ -1,1 +1,8 @@
-{"nombre":"Alerce","edad":32,"profesion":"Desarrollador","hobbies":["música","caminar","programar"]}
+[
+  {
+    "nombre": "Alerce",
+    "edad": "32",
+    "profesion": "Programador",
+    "pasatiempo": "Música"
+  }
+]
