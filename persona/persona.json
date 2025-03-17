@@ -1,8 +1,25 @@
 [
   {
-    "nombre": "Alerce",
-    "edad": "32",
-    "profesion": "Programador",
-    "pasatiempo": "Música"
+    "id": 1,
+    "nombre": "Alguien",
+    "edad": "33",
+    "profesion": "Algo",
+    "pasatiempos": [
+      "Cosas",
+      "Varias",
+      "No se"
+    ]
+  },
+  {
+    "id": 2,
+    "nombre": "Alguien",
+    "edad": 33,
+    "profesion": "Algo",
+    "pasatiempos": [
+      "Cosas",
+      "Varias",
+      "Otras",
+      "Yee"
+    ]
   }
 ]
