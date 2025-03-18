@@ -105,13 +105,82 @@ def mostrar_personas
   end
 end
 
+# Función para modificar una persona
+def modificar_persona
+  personas = cargar_personas
+  mostrar_personas
+
+  print "Ingresa el ID de la persona a modificar: "
+  id = gets.chomp.to_i
+
+  persona = personas.find { |p| p.id == id }
+  
+  if persona
+    puts "Modificando a #{persona.nombre}. Deja vacío para no cambiar el valor."
+
+    print "Nuevo nombre (actual: #{persona.nombre}): "
+    nuevo_nombre = gets.chomp
+    persona.nombre = nuevo_nombre unless nuevo_nombre.empty?
+
+    print "Nueva edad (actual: #{persona.edad}): "
+    nueva_edad = gets.chomp
+    persona.edad = nueva_edad.to_i if nueva_edad.match?(/^\d+$/)
+
+    print "Nueva profesión (actual: #{persona.profesion}): "
+    nueva_profesion = gets.chomp
+    persona.profesion = nueva_profesion unless nueva_profesion.empty?
+
+    puts "Nuevos pasatiempos (actuales: #{persona.pasatiempos.join(', ')})"
+    puts "Ingresa uno por línea. Deja vacío para finalizar."
+    nuevos_pasatiempos = []
+    loop do
+      entrada = gets.chomp
+      break if entrada.empty?
+      nuevos_pasatiempos << entrada
+    end
+    persona.pasatiempos = nuevos_pasatiempos unless nuevos_pasatiempos.empty?
+
+    guardar_personas(personas)
+    puts "¡Datos actualizados exitosamente!"
+  else
+    puts "No se encontró ninguna persona con ese ID."
+  end
+end
+
+# Función para eliminar una persona
+def eliminar_persona
+  personas = cargar_personas
+  mostrar_personas
+
+  print "Ingresa el ID de la persona a eliminar: "
+  id = gets.chomp.to_i
+
+  persona = personas.find { |p| p.id == id }
+
+  if persona
+    print "¿Estás seguro de que deseas eliminar a #{persona.nombre}? (S/N): "
+    confirmacion = gets.chomp.upcase
+    if confirmacion == 'S'
+      personas.reject! { |p| p.id == id }
+      guardar_personas(personas)
+      puts "Persona eliminada exitosamente."
+    else
+      puts "Operación cancelada."
+    end
+  else
+    puts "No se encontró ninguna persona con ese ID."
+  end
+end
+
 # Menú principal
 loop do
   puts "¡Bienvenido!"
   puts "\nMenú Principal"
   puts "1) Agregar persona"
   puts "2) Mostrar personas registradas"
-  puts "3) Salir"
+  puts "3) Modificar persona"
+  puts "4) Eliminar persona"
+  puts "5) Salir"
   print "Elige una opción: "
   
   opcion = gets.chomp
@@ -122,6 +191,10 @@ loop do
   when "2"
     mostrar_personas
   when "3"
+    modificar_persona
+  when "4"
+    eliminar_persona
+  when "5"
     puts "Saliendo del programa..."
     break
   else

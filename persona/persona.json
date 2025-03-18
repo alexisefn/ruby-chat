@@ -1,25 +1,13 @@
 [
   {
     "id": 1,
-    "nombre": "Alguien",
-    "edad": "33",
-    "profesion": "Algo",
+    "nombre": "Uno",
+    "edad": 22,
+    "profesion": "Alguna",
     "pasatiempos": [
       "Cosas",
       "Varias",
       "No se"
-    ]
-  },
-  {
-    "id": 2,
-    "nombre": "Alguien",
-    "edad": 33,
-    "profesion": "Algo",
-    "pasatiempos": [
-      "Cosas",
-      "Varias",
-      "Otras",
-      "Yee"
     ]
   }
 ]
