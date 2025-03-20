@@ -9,5 +9,15 @@
       "Varias",
       "No se"
     ]
+  },
+  {
+    "id": 2,
+    "nombre": "Otro",
+    "edad": 22,
+    "profesion": "Alguna",
+    "pasatiempos": [
+      "varios",
+      "no se"
+    ]
   }
 ]
