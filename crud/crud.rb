@@ -14,16 +14,41 @@ else
 end
 
 puts "¡Hola!"
-puts "Ingrese su nombre:"
-nombre = gets.chomp
-puts "Ingrese su edad:"
-edad = gets.chomp.to_i
+puts "¿Qué desea hacer?"
+puts "1. Ingresar nuevos datos"
+puts "2. Ver datos guardados"
+opcion = gets.chomp.to_i
 
-datos << { "nombre" => nombre, "edad" => edad }
+if opcion == 1
+  puts "Ingrese su nombre:"
+  nombre = gets.chomp
+  puts "Ingrese su edad:"
+  edad = gets.chomp.to_i
 
-File.open(archivo, "w") do |f|
-  f.write(JSON.pretty_generate(datos))
+  datos << { "nombre" => nombre, "edad" => edad }
+
+  File.open(archivo, "w") do |f|
+    f.write(JSON.pretty_generate(datos))
+  end
+  
+  puts "¡Datos guardados con éxito!"
+
+elsif opcion == 2
+  if datos.empty?
+    puts "No hay datos guardados."
+  else
+    puts "Lista de datos guardados:"
+    datos.each_with_index do |persona, i|
+      puts "#{i + 1}. Nombre: #{persona["nombre"]}, Edad: #{persona["edad"]}"
+    end
+  end
+else
+  puts "Lo siento, no ingresaste una opción válida."
 end
 
-puts "¡Datos guardados con éxito!"
 puts "¡Hasta la próxima!"
+
+# Este es un commit desde VS Code
+
+# Próximo objetivo:
+# Modificar y eliminar datos
