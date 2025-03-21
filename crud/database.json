@@ -1,18 +1,12 @@
 [
   {
+    "id": 1,
     "nombre": "Uno",
     "edad": 33
   },
   {
-    "nombre": "Dos",
-    "edad": 44
-  },
-  {
-    "nombre": "Tres",
-    "edad": 55
-  },
-  {
-    "nombre": "Nuevo",
-    "edad": 99
+    "id": 2,
+    "nombre": "Persona Vieja",
+    "edad": 22
   }
 ]
