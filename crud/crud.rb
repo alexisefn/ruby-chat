@@ -4,6 +4,14 @@
 require 'json'
 archivo = "database.json"
 
+# Función para guardar datos en el archivo JSON
+# Para no tener que re-escribir esta parte en cada función que modifique el archivo
+def guardar_datos(archivo, datos)
+  File.open(archivo, "w") do |f|
+    f.write(JSON.pretty_generate(datos))
+  end
+end
+
 # Antes de agregar nuevos datos, se debe verificar si el archivo JSON ya contiene datos.
 # De lo contrario, se reescribirá lo previamente guardado cada vez que se ingresan nuevos datos.
 if File.exist?(archivo)
@@ -18,6 +26,7 @@ puts "¿Qué desea hacer?"
 puts "1. Ingresar nuevos datos"
 puts "2. Ver datos guardados"
 puts "3. Modificar datos"
+puts "4. Eliminar datos"
 opcion = gets.chomp.to_i
 
 if opcion == 1
@@ -32,9 +41,7 @@ if opcion == 1
 
   datos << { "id" => ultimo_id, "nombre" => nombre, "edad" => edad }
 
-  File.open(archivo, "w") do |f|
-    f.write(JSON.pretty_generate(datos))
-  end
+  guardar_datos(archivo, datos)
   
   puts "¡Datos guardados con éxito!"
 
@@ -57,7 +64,7 @@ elsif opcion == 3
       puts "ID: #{persona["id"]} - Nombre: #{persona["nombre"]}, Edad: #{persona["edad"]}"
     end
 
-    puts "Ingrese el ID  de la persona que desea modificar:"
+    puts "Ingrese el ID de la persona que desea modificar:"
     id_modificar = gets.chomp.to_i
 
     # Busca el registro que coincida con el ID ingresado
@@ -76,14 +83,34 @@ elsif opcion == 3
       persona["nombre"] = nuevo_nombre unless nuevo_nombre.empty?
       persona["edad"] = nueva_edad.to_i unless nueva_edad.empty?
 
-      File.open(archivo, "w") do |f|
-        f.write(JSON.pretty_generate(datos))
-      end
+      guardar_datos(archivo, datos)
 
       puts "¡Datos modificados con éxito!"
 
     else
-      puts "ID no encontrado"
+      puts "ID no encontrado."
+    end
+  end
+elsif opcion == 4
+  if datos.empty?
+    puts "Lo siento, no puede realizar esta acción porque no hay datos guardados."
+  else
+    puts "Lista de datos guardados:"
+    datos.each do |persona|
+      puts "ID: #{persona["id"]} - Nombre: #{persona["nombre"]}, Edad: #{persona["edad"]}"
+    end
+
+    puts "Ingrese el ID de la persona que desea eliminar:"
+    id_eliminar = gets.chomp.to_i
+
+    # Filtrar los datos para eliminar el registro con el ID ingresado
+    datos_filtrados = datos.reject { |p| p["id"] == id_eliminar }
+
+    if datos_filtrados.size < datos.size
+      guardar_datos(archivo, datos_filtrados)
+      puts "¡Datos eliminados con éxito!"
+    else
+      puts "ID no encontrado."
     end
   end
 else
@@ -92,7 +119,5 @@ end
 
 puts "¡Hasta la próxima!"
 
-# Este es un commit desde VS Code
-
 # Próximo objetivo:
-# Modificar y eliminar datos
+# Hacer que el menú principal aparezca luego de realizar alguna función
