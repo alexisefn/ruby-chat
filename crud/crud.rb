@@ -21,15 +21,19 @@ else
   datos = []
 end
 
-puts "¡Hola!"
+puts "¡Bienvenido!"
+
+loop do 
 puts "¿Qué desea hacer?"
 puts "1. Ingresar nuevos datos"
 puts "2. Ver datos guardados"
 puts "3. Modificar datos"
 puts "4. Eliminar datos"
+puts "5. Salir del programa"
 opcion = gets.chomp.to_i
 
-if opcion == 1
+case opcion
+when 1
   puts "Ingrese su nombre:"
   nombre = gets.chomp
   puts "Ingrese su edad:"
@@ -45,7 +49,7 @@ if opcion == 1
   
   puts "¡Datos guardados con éxito!"
 
-elsif opcion == 2
+when 2
   if datos.empty?
     puts "Lo siento, no hay datos guardados."
   else
@@ -55,7 +59,7 @@ elsif opcion == 2
     end
   end
 
-elsif opcion == 3
+when 3
   if datos.empty?
     puts "Lo siento, no puede realizar esta acción porque no hay datos guardados."
   else
@@ -91,7 +95,8 @@ elsif opcion == 3
       puts "ID no encontrado."
     end
   end
-elsif opcion == 4
+
+when 4
   if datos.empty?
     puts "Lo siento, no puede realizar esta acción porque no hay datos guardados."
   else
@@ -113,11 +118,16 @@ elsif opcion == 4
       puts "ID no encontrado."
     end
   end
+
+when 5
+  puts "¡Hasta la próxima!"
+  break # Sale del loop y finaliza el programa.
+
 else
   puts "Lo siento, no ingresaste una opción válida."
 end
-
-puts "¡Hasta la próxima!"
+end
 
 # Próximo objetivo:
-# Hacer que el menú principal aparezca luego de realizar alguna función
+# Reorganizar código en clases y objetos
+# Validar ingreso de datos
