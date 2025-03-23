@@ -4,6 +4,7 @@
 require 'json'
 
 class Persona
+  # Leer y modificar los atributos desde fuera de la clase
   attr_accessor :id, :nombre, :edad
 
   def initialize(id, nombre, edad)
@@ -34,7 +35,7 @@ class GestorDatos
     end
   end
 
-  # Función para guardar datos en el archivo JSON
+  # Método para guardar datos en el archivo JSON
   # Para no tener que re-escribir esta parte en cada función que modifique el archivo
   def guardar_datos
     File.open(@archivo, "w") do |f|
@@ -42,15 +43,24 @@ class GestorDatos
     end
   end
 
-  # Funciones para validar el ingreso de datos
-  # Ejemplo: Que nombre solo contenga letras, espacios, apóstrofes y guiones
-  # O que edad solo contenga números
+  # Métodos para validar el ingreso de datos
+  # Ejemplo: Que nombre solo contenga letras, espacios, apóstrofes y guiones o que edad solo contenga números
   def nombre_valido?(nombre)
     !!(nombre =~ /\A[a-zA-ZÁÉÍÓÚáéíóúñÑ\s'-]+\z/)
   end
 
   def edad_valida?(edad)
     edad.match?(/\A\d+\z/) && edad.to_i > 0
+  end
+
+  # Método para verificar si hay datos guardados
+  # Anteriormente esto estaba en mas de un método y se repetía mucho
+  def datos_vacios?
+    if @datos.empty?
+      puts "Lo siento, no hay datos guardados."
+      return true
+    end
+    false
   end
 
   def agregar_persona
@@ -82,21 +92,16 @@ class GestorDatos
   end
 
   def listar_personas
-    if @datos.empty?
-      puts "Lo siento, no hay datos guardados."
-    else
-      puts "Lista de datos guardados:"
-      @datos.each do |persona|
-        puts "ID: #{persona["id"]} - Nombre: #{persona["nombre"]}, Edad: #{persona["edad"]}"
-      end
+    return if datos_vacios?
+
+    puts "Lista de datos guardados:"
+    @datos.each do |persona|
+      puts "ID: #{persona["id"]} - Nombre: #{persona["nombre"]}, Edad: #{persona["edad"]}"
     end
   end
 
   def modificar_persona
-    if @datos.empty?
-      puts "Lo siento, no puede realizar esta acción porque no hay datos guardados."
-      return
-    end
+    return if datos_vacios?
 
     listar_personas
     puts "Ingrese el ID de la persona que desea modificar:"
@@ -124,10 +129,7 @@ class GestorDatos
   end
 
   def eliminar_persona
-    if @datos.empty?
-      puts "Lo siento, no puede realizar esta acción porque no hay datos guardados."
-      return
-    end
+    return if datos_vacios?
 
     listar_personas
     puts "Ingrese el ID de la persona que desea eliminar:"
