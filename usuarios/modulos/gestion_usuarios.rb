@@ -1,41 +1,12 @@
-# 24/03/2025
-# Mi tercer programa creado con Ruby ಠ_ಠ !
+# Gestión de Usuarios
+# Este módulo contendrá los métodos para registrar, iniciar sesión, modificar y eliminar usuarios.
 
 require 'json'
+require_relative '../usuario'
+require_relative 'autenticacion'
 
-# Clase base Usuario
-class Usuario
-  attr_accessor :username, :password, :tipo
-
-  def initialize(username, password, tipo)
-    @username = username
-    @password = password
-    @tipo = tipo # "Administrador" o "Usuario"
-  end
-  
-  def to_hash
-    { "username" => @username, "password" => @password, "tipo" => @tipo }
-  end
-
-  def ver_perfil
-    puts "Nombre de Usuario: #{@username}"
-    puts "Tipo: #{@tipo}"
-  end
-end
-
-# Clase Administrador que hereda de Usuario
-class Administrador < Usuario
-  def initialize(username, password)
-    super(username, password, "Administrador")
-  end
-end
-
-# Clase para gestionar usuarios
-class GestorUsuarios
-  def initialize(archivo)
-    @archivo = archivo
-    @usuarios = cargar_usuarios
-  end
+module GestionUsuarios
+  include Autenticacion
 
   def cargar_usuarios
     if File.exist?(@archivo)
@@ -50,15 +21,6 @@ class GestorUsuarios
     File.open(@archivo, "w") do |f| # f = archivo a modificar (en este caso, el JSON)
       f.write(JSON.pretty_generate(@usuarios))
     end
-  end
-
-  # Verificar que no se ingresen datos vacíos
-  def verificar_dato_vacio(dato, mensaje_error)
-    if dato.empty?
-      puts mensaje_error
-      return true
-    end
-    false
   end
 
   def registrar_usuario
@@ -109,7 +71,7 @@ class GestorUsuarios
       end
     end
   end
-  
+
   def modificar_password(usuario)
     puts "Ingrese su nueva contraseña:"
     nueva_password = gets.chomp
@@ -148,7 +110,7 @@ class GestorUsuarios
     guardar_usuarios
     puts "Contraseña de #{usuario["username"]} modificada correctamente."
   end
-  
+
   def eliminar_usuario(administrador)
     usuario = nil
     loop do
@@ -172,79 +134,9 @@ class GestorUsuarios
     guardar_usuarios
     puts "Usuario #{usuario["username"]} eliminado correctamente."
   end
-end
-  
-# ------------------ FLUJO PRINCIPAL ------------------
-archivo = "usuarios.json"
-gestor = GestorUsuarios.new(archivo)
 
-puts "¡Bienvenido al sistema de autenticación!"
-
-loop do
-  puts "\n¿Qué desea hacer?"
-  puts "1. Registrarse"
-  puts "2. Iniciar sesión"
-  puts "3. Salir"
-  opcion = gets.chomp.to_i
-
-  case opcion
-  when 1
-    gestor.registrar_usuario
-  when 2
-    usuario_actual = gestor.iniciar_sesion
-    if usuario_actual
-      if usuario_actual["tipo"] == "Administrador"
-        loop do
-          puts "\nMenú Administrador:"
-          puts "1. Ver lista de usuarios"
-          puts "2. Modificar contraseña"
-          puts "3. Modificar contraseña de otro usuario"
-          puts "4. Eliminar usuario"
-          puts "5. Cerrar sesión"
-          opcion_admin = gets.chomp.to_i
-
-          case opcion_admin
-          when 1
-            gestor.listar_usuarios
-          when 2
-            gestor.modificar_password(usuario_actual)
-          when 3
-            gestor.modificar_password_otro
-          when 4
-            gestor.eliminar_usuario(usuario_actual)
-          when 5
-            puts "Cerrando sesión..."
-            break
-          else
-            puts "Opción inválida. Intente nuevamente."
-          end
-        end
-      else
-        loop do
-          puts "\nMenú Usuario:"
-          puts "1. Modificar contraseña"
-          puts "2. Cerrar sesión"
-          opcion_usuario = gets.chomp.to_i
-
-          case opcion_usuario
-          when 1
-            gestor.modificar_password(usuario_actual)
-          when 2
-            puts "Cerrando sesión..."
-            break
-          else
-            puts "Opción inválida. Intente nuevamente."
-          end
-        end
-      end
-    end
-  when 3
-    puts "¡Hasta la próxima!"
-    break
-  else
-    puts "Opción inválida. Intente nuevamente."
+  def listar_usuarios
+    puts "Lista de usuarios:"
+    @usuarios.each { |u| puts "- #{u["username"]} (#{u["tipo"]})" }
   end
 end
-
-# Siguiente objetivo:
-# ???
