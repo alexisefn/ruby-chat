@@ -5,8 +5,13 @@
     "tipo": "Administrador"
   },
   {
-    "username": "Promedio",
-    "password": "54321",
+    "username": "Segundo",
+    "password": "2222",
+    "tipo": "Usuario"
+  },
+  {
+    "username": "Tercero",
+    "password": "333",
     "tipo": "Usuario"
   }
 ]

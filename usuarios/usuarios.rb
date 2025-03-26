@@ -52,12 +52,32 @@ class GestorUsuarios
     end
   end
 
+  # Verificar que no se ingresen datos vacíos
+  def verificar_dato_vacio(dato, mensaje_error)
+    if dato.empty?
+      puts mensaje_error
+      return true
+    end
+    false
+  end
+
   def registrar_usuario
     puts "Ingrese su nombre de usuario:"
     username = gets.chomp
+    
+    return if verificar_dato_vacio(username, "No puede dejar este campo vacío.")
+
+    # Verificar si el nombre de usuario ya está registrado
+    if @usuarios.any? { |u| u["username"] == username }
+      puts "El nombre de usuario ya está registrado. Por favor, elija otro."
+      return
+    end
+
     puts "Ingrese su contraseña:"
     password = gets.chomp
-  
+
+    return if verificar_dato_vacio(password, "No puede dejar este campo vacío.")
+      
     # Por defecto, los nuevos usuarios serán tipo "Usuario"
     # Sólo el primer usuario registrado será Administrador
     tipo = @usuarios.empty? ? "Administrador" : "Usuario"
@@ -70,22 +90,26 @@ class GestorUsuarios
   end
 
   def iniciar_sesion
-    puts "Ingrese su nombre de usuario:"
-    username = gets.chomp
-    puts "Ingrese su contraseña:"
-    password = gets.chomp
-
-    usuario = @usuarios.find { |u| u["username"] == username && u["password"] == password }
-      
-    if usuario
-      puts "¡Bienvenido, #{usuario["username"]}!"
-      return usuario
-    else
-      puts "Nombre de usuario o contraseña incorrectos."
-      return nil
+    usuario = nil
+  
+    loop do
+      puts "Ingrese su nombre de usuario:"
+      username = gets.chomp.strip
+  
+      puts "Ingrese su contraseña:"
+      password = gets.chomp.strip
+  
+      usuario = @usuarios.find { |u| u["username"] == username && u["password"] == password }
+  
+      if usuario
+        puts "¡Bienvenido, #{usuario["username"]}!"
+        return usuario
+      else
+        puts "Nombre de usuario o contraseña incorrectos. Intente nuevamente."
+      end
     end
   end
-
+  
   def modificar_password(usuario)
     puts "Ingrese su nueva contraseña:"
     nueva_password = gets.chomp
@@ -95,45 +119,61 @@ class GestorUsuarios
   end
 
   def modificar_password_otro
-    puts "Ingrese el nombre de usuario al que desea cambiar la contraseña:"
-    username = gets.chomp
-    usuario = @usuarios.find { |u| u["username"] == username }
-
-    if usuario
-      puts "Ingrese la nueva contraseña para #{username}:"
-      nueva_password = gets.chomp
-      usuario["password"] = nueva_password
-      guardar_usuarios
-      puts "Contraseña de #{username} modificada correctamente."
-    else
-      puts "Usuario no encontrado."
-    end
-  end
-
-  def eliminar_usuario(administrador)
-    puts "Ingrese el nombre de usuario a eliminar:"
-    username = gets.chomp
-    usuario = @usuarios.find { |u| u["username"] == username }
-
-    if usuario
-      if usuario["username"] == administrador["username"]
-        puts "No puedes eliminarte a ti mismo."
+    usuario = nil
+    loop do
+      puts "Ingrese el nombre de usuario al que desea cambiar la contraseña:"
+      username = gets.chomp.strip
+      usuario = @usuarios.find { |u| u["username"] == username }
+  
+      if usuario
+        break # Si se encuentra el usuario, se sale del bucle
       else
-        @usuarios.delete(usuario)
-        guardar_usuarios
-        puts "Usuario #{username} eliminado correctamente."
+        puts "Usuario no encontrado. Intente nuevamente."
       end
-    else
-      puts "Usuario no encontrado."
     end
+  
+    # Pedir nueva contraseña
+    nueva_password = ""
+    loop do
+      puts "Ingrese la nueva contraseña para #{usuario["username"]}:"
+      nueva_password = gets.chomp.strip
+      if nueva_password.empty?
+        puts "La contraseña no puede estar vacía."
+      else
+        break
+      end
+    end
+  
+    usuario["password"] = nueva_password
+    guardar_usuarios
+    puts "Contraseña de #{usuario["username"]} modificada correctamente."
   end
-
-  def listar_usuarios
-    puts "Lista de usuarios:"
-    @usuarios.each { |u| puts "- #{u["username"]} (#{u["tipo"]})" }
+  
+  def eliminar_usuario(administrador)
+    usuario = nil
+    loop do
+      puts "Ingrese el nombre de usuario a eliminar:"
+      username = gets.chomp.strip
+      usuario = @usuarios.find { |u| u["username"] == username }
+  
+      if usuario
+        break # Si se encuentra el usuario, se sale del bucle
+      else
+        puts "Usuario no encontrado. Intente nuevamente."
+      end
+    end
+  
+    if usuario["username"] == administrador["username"]
+      puts "No puedes eliminarte a ti mismo."
+      return
+    end
+    
+    @usuarios.delete(usuario)
+    guardar_usuarios
+    puts "Usuario #{usuario["username"]} eliminado correctamente."
   end
 end
-
+  
 # ------------------ FLUJO PRINCIPAL ------------------
 archivo = "usuarios.json"
 gestor = GestorUsuarios.new(archivo)
@@ -207,4 +247,4 @@ loop do
 end
 
 # Siguiente objetivo:
-# Realizar verificaciones
+# ???
