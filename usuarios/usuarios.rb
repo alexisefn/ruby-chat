@@ -14,12 +14,12 @@ class Usuario
   end
   
   def to_hash
-    { "username" => @username, "password" => @password, "tipo" => @tipo}
+    { "username" => @username, "password" => @password, "tipo" => @tipo }
   end
 
   def ver_perfil
     puts "Nombre de Usuario: #{@username}"
-    puts "tipo: #{@tipo}"
+    puts "Tipo: #{@tipo}"
   end
 end
 
@@ -57,17 +57,16 @@ class GestorUsuarios
     username = gets.chomp
     puts "Ingrese su contraseña:"
     password = gets.chomp
-    
+  
     # Por defecto, los nuevos usuarios serán tipo "Usuario"
     # Sólo el primer usuario registrado será Administrador
-    tipo = "Usuario"
-    tipo = "Administrador" if @usuarios.empty?
+    tipo = @usuarios.empty? ? "Administrador" : "Usuario"
 
     usuario = Usuario.new(username, password, tipo)
 
     @usuarios << usuario.to_hash
     guardar_usuarios
-    puts "¡Registro exitoso"
+    puts "¡Registro exitoso!"
   end
 
   def iniciar_sesion
@@ -76,15 +75,62 @@ class GestorUsuarios
     puts "Ingrese su contraseña:"
     password = gets.chomp
 
-    usuario = @usuarios.find { |u| u["username"] == username && u["password"] == password}
+    usuario = @usuarios.find { |u| u["username"] == username && u["password"] == password }
       
     if usuario
-      puts "¡Bienvenido, #{usuario["username"]}"
+      puts "¡Bienvenido, #{usuario["username"]}!"
       return usuario
     else
       puts "Nombre de usuario o contraseña incorrectos."
       return nil
     end
+  end
+
+  def modificar_password(usuario)
+    puts "Ingrese su nueva contraseña:"
+    nueva_password = gets.chomp
+    usuario["password"] = nueva_password
+    guardar_usuarios
+    puts "Contraseña modificada exitosamente."
+  end
+
+  def modificar_password_otro
+    puts "Ingrese el nombre de usuario al que desea cambiar la contraseña:"
+    username = gets.chomp
+    usuario = @usuarios.find { |u| u["username"] == username }
+
+    if usuario
+      puts "Ingrese la nueva contraseña para #{username}:"
+      nueva_password = gets.chomp
+      usuario["password"] = nueva_password
+      guardar_usuarios
+      puts "Contraseña de #{username} modificada correctamente."
+    else
+      puts "Usuario no encontrado."
+    end
+  end
+
+  def eliminar_usuario(administrador)
+    puts "Ingrese el nombre de usuario a eliminar:"
+    username = gets.chomp
+    usuario = @usuarios.find { |u| u["username"] == username }
+
+    if usuario
+      if usuario["username"] == administrador["username"]
+        puts "No puedes eliminarte a ti mismo."
+      else
+        @usuarios.delete(usuario)
+        guardar_usuarios
+        puts "Usuario #{username} eliminado correctamente."
+      end
+    else
+      puts "Usuario no encontrado."
+    end
+  end
+
+  def listar_usuarios
+    puts "Lista de usuarios:"
+    @usuarios.each { |u| puts "- #{u["username"]} (#{u["tipo"]})" }
   end
 end
 
@@ -107,11 +153,49 @@ loop do
   when 2
     usuario_actual = gestor.iniciar_sesion
     if usuario_actual
-      puts "Bienvenido, #{usuario_actual["nombre"]}."
-      if usuario_actual["tipo"] == "admin"
-        puts "Eres administrador. Puedes gestionar usuarios."
+      if usuario_actual["tipo"] == "Administrador"
+        loop do
+          puts "\nMenú Administrador:"
+          puts "1. Ver lista de usuarios"
+          puts "2. Modificar contraseña"
+          puts "3. Modificar contraseña de otro usuario"
+          puts "4. Eliminar usuario"
+          puts "5. Cerrar sesión"
+          opcion_admin = gets.chomp.to_i
+
+          case opcion_admin
+          when 1
+            gestor.listar_usuarios
+          when 2
+            gestor.modificar_password(usuario_actual)
+          when 3
+            gestor.modificar_password_otro
+          when 4
+            gestor.eliminar_usuario(usuario_actual)
+          when 5
+            puts "Cerrando sesión..."
+            break
+          else
+            puts "Opción inválida. Intente nuevamente."
+          end
+        end
       else
-        puts "Eres usuario. Solo puedes ver tu perfil."
+        loop do
+          puts "\nMenú Usuario:"
+          puts "1. Modificar contraseña"
+          puts "2. Cerrar sesión"
+          opcion_usuario = gets.chomp.to_i
+
+          case opcion_usuario
+          when 1
+            gestor.modificar_password(usuario_actual)
+          when 2
+            puts "Cerrando sesión..."
+            break
+          else
+            puts "Opción inválida. Intente nuevamente."
+          end
+        end
       end
     end
   when 3
@@ -121,3 +205,8 @@ loop do
     puts "Opción inválida. Intente nuevamente."
   end
 end
+
+# Siguiente objetivo:
+# Agregar métodos para:
+# - Modificar contraseña (todos los usuarios)
+# - Eliminar usuarios (Sólo Administrador)
