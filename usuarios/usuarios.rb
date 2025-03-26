@@ -47,7 +47,7 @@ class GestorUsuarios
   end
 
   def guardar_usuarios
-    File.open(@archivo, "w") do |f|
+    File.open(@archivo, "w") do |f| # f = archivo a modificar (en este caso, el JSON)
       f.write(JSON.pretty_generate(@usuarios))
     end
   end
@@ -64,7 +64,7 @@ class GestorUsuarios
 
     usuario = Usuario.new(username, password, tipo)
 
-    @usuarios << usuario.to_hash
+    @usuarios << usuario.to_hash # << = agregar elementos a un array
     guardar_usuarios
     puts "¡Registro exitoso!"
   end
@@ -207,6 +207,4 @@ loop do
 end
 
 # Siguiente objetivo:
-# Agregar métodos para:
-# - Modificar contraseña (todos los usuarios)
-# - Eliminar usuarios (Sólo Administrador)
+# Realizar verificaciones
