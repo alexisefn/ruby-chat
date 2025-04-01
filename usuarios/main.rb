@@ -75,4 +75,4 @@ loop do
 end
 
 # Siguiente objetivo:
-# ???
+# Convertir este proyecto en un programa de chat
