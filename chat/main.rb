@@ -1,6 +1,6 @@
 # 29/03/2025
 # Mi cuarto proyecto en Ruby. 
-# :)
+# (¡Deseenme suerte!)
 
 require 'json'
 
@@ -33,13 +33,13 @@ def registrar_usuario
   
   # Validaciones
   if username.empty? || password.empty?
-    puts "Error: Nombre y contraseña no pueden estar vacíos."
+    puts "Nombre y contraseña no pueden estar vacíos."
     return
   end
   
   # Verificar si el usuario ya existe
   if usuarios.any? { |u| u["username"].downcase == username.downcase }
-    puts "Error: El usuario ya existe."
+    puts "El usuario ya existe."
     return
   end
   
@@ -63,6 +63,43 @@ def registrar_usuario
   puts "Usuario registrado con éxito."
 end
 
+def iniciar_sesion
+  usuarios = cargar_usuarios
+
+  puts "Ingrese su nombre de usuario:"
+  username = gets.chomp.strip
+  puts "Ingrese su contraseña:"
+  password = gets.chomp.strip
+
+  usuario = usuarios.find { |u| u["username"].downcase == username.downcase && u["password"] == password}
+
+  if usuario
+    puts "¡Bienvenido. #{usuario["username"]}!"
+    return usuario
+  else
+    puts "Nombre de usuario o contraseña incorrectos. Intente nuevamente."
+  end
+end
+
 if __FILE__ == $0
-  registrar_usuario
+  loop do
+    puts "Seleccione una opción:"
+    puts "1) Registrar usuario"
+    puts "2) Iniciar sesión"
+    puts "3) Salir"
+    print "Opción: "
+    opcion = gets.chomp.strip
+
+    case opcion
+    when "1"
+      registrar_usuario
+    when "2"
+      iniciar_sesion
+    when "3"
+      puts "Saliendo del programa. ¡Hasta la próxima!"
+      break
+    else
+      puts "Opción invalida. Intente nuevamente."
+    end
+  end
 end
