@@ -1,6 +1,6 @@
 # 29/03/2025
 # Mi cuarto proyecto en Ruby. 
-# (¡Deseenme suerte!)
+# (¡Suerte!)
 
 require 'json'
 
@@ -88,14 +88,43 @@ if __FILE__ == $0
     puts "2) Iniciar sesión"
     puts "3) Salir"
     print "Opción: "
-    opcion = gets.chomp.strip
+    opcion = gets.chomp.to_i
 
     case opcion
-    when "1"
+    when 1
       registrar_usuario
-    when "2"
-      iniciar_sesion
-    when "3"
+    when 2
+      usuario_actual = iniciar_sesion
+      if usuario_actual["rol"] == "administrador"
+        loop do 
+          puts "\nMenú Administrador:"
+          puts "1) Cerrar sesión"
+          opcion_admin = gets.chomp.to_i
+
+          case opcion_admin
+          when 1
+            puts "Cerrando sesión..."
+            break
+          else
+            puts "Opción invalida. Intente nuevamente."
+          end
+        end
+      else
+        loop do 
+          puts "\nMenú Usuario:"
+          puts "1) Cerrar sesión"
+          opcion_admin = gets.chomp.to_i
+
+          case opcion_admin
+          when 1
+            puts "Cerrando sesión..."
+            break
+          else
+            puts "Opción invalida. Intente nuevamente."
+          end
+        end
+      end
+    when 3
       puts "Saliendo del programa. ¡Hasta la próxima!"
       break
     else
