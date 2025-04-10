@@ -3,6 +3,7 @@
 
 require 'json'
 require 'time' # Para las marcas de tiempo
+require 'io/console' # Para ocultar contraseñas al ingresarlas
 
 # Constantes para los nombres de archivo
 ARCHIVO_MENSAJES = 'mensajes.json'
@@ -88,7 +89,7 @@ end
 
 # --- Lógica Principal del Script ---
 
-# 1. Pedir nombre de usuario Y GESTIONARLO
+# 1. GESTIÓN DE USUARIO Y CONTRASEÑA AL INICIO
 puts "Ingresa tu nombre de usuario:"
 username = gets.chomp
 
@@ -100,27 +101,9 @@ usuarios = cargar_usuarios
 # Devuelve el objeto 'usuario' (un Hash) si lo encuentra, o 'nil' si no.
 usuario_actual = usuarios.find { |usuario| usuario['username'] == username }
 
-# Verificar si se encontró el usuario
-if usuario_actual.nil?
-  # Usuario NO encontrado -> Es un usuario nuevo
-  puts "Usuario nuevo '#{username}' detectado, registrando..."
-  # Crear el hash para el nuevo usuario
-  nuevo_usuario = {
-    "username" => username,
-    "es_admin" => false, # Los nuevos usuarios no son admin por defecto
-    "bloqueado" => false # Los nuevos usuarios no están bloqueados por defecto
-  }
-  # Añadir el nuevo usuario al array de usuarios
-  usuarios << nuevo_usuario
-  # Guardar el array actualizado en usuarios.json
-  guardar_usuarios(usuarios)
-  # Guardamos la referencia al nuevo usuario para futuras comprobaciones (bloqueo)
-  usuario_actual = nuevo_usuario
-  puts "¡Usuario registrado con éxito!"
+if usuario_actual # --- Usuario ENCONTRADO ---
+  puts "Usuario '#{username}' encontrado."
 
-else
-  # Usuario SÍ encontrado
-  puts "Bienvenido de vuelta, #{username}!"
   # AQUÍ ES DONDE LUEGO COMPROBAREMOS SI EL USUARIO ESTÁ BLOQUEADO
   if usuario_actual['bloqueado'] == true
     puts "-----------------------------------------------------"
@@ -128,11 +111,77 @@ else
     puts "-----------------------------------------------------"
     exit # Terminar el script si está bloqueado
   end
-end
+
+  # --- NUEVO: Pedir Contraseña ---
+  print "Ingresa tu contraseña: "
+  # Usamos STDIN.noecho para ocultar la contraseña mientras se escribe (opcional pero recomendado)
+  # require 'io/console' # Necesitarás esto al principio del script
+  intento_password = STDIN.noecho(&:gets).chomp
+  puts # Añadir un salto de línea después de ocultar input
+  # ---- Alternativa sin ocultar (más simple por ahora): ----
+  # intento_password = gets.chomp
+  # ---- Fin Alternativa ----
+
+
+  # --- NUEVO: Verificar Contraseña ---
+  # Asegúrate de que el usuario tenga una clave 'password' en el JSON
+  if usuario_actual['password'] && usuario_actual['password'] == intento_password
+    puts "Contraseña correcta. Bienvenido de vuelta, #{username}!"
+    # La variable 'usuario_actual' ya está asignada correctamente.
+  else
+    puts "-----------------------------------------------------"
+    puts "ACCESO DENEGADO: Contraseña incorrecta."
+    puts "-----------------------------------------------------"
+    exit # Terminar si la contraseña es incorrecta
+  end
+
+else # --- Usuario NO ENCONTRADO ---
+  puts "Usuario nuevo '#{username}'. Creando cuenta..."
+
+  # --- NUEVO: Crear Contraseña ---
+  password = ""
+  confirmacion_password = ""
+
+  loop do
+    print "Crea una contraseña para '#{username}': "
+    # password = STDIN.noecho(&:gets).chomp
+    # puts
+    # ---- Alternativa sin ocultar ----
+    password = gets.chomp
+    # ---- Fin Alternativa ----
+
+
+    print "Confirma la contraseña: "
+    # confirmacion_password = STDIN.noecho(&:gets).chomp
+    # puts
+     # ---- Alternativa sin ocultar ----
+    confirmacion_password = gets.chomp
+    # ---- Fin Alternativa ----
+
+    # Verificar si las contraseñas coinciden y no están vacías
+    if password == confirmacion_password && !password.empty?
+      puts "Contraseña creada con éxito."
+      break # Salir del loop de creación de contraseña
+    else
+      puts "Las contraseñas no coinciden o están vacías. Inténtalo de nuevo."
+    end
+  end
+
+  # Crear el hash para el nuevo usuario (¡incluyendo la contraseña!)
+  nuevo_usuario = {
+    "username" => username,
+    "password" => password, # ¡Guardando contraseña en texto plano! (Inseguro)
+    "es_admin" => false, # Los nuevos usuarios no son admin por defecto
+    "bloqueado" => false # Los nuevos usuarios no están bloqueados por defecto
+  }
+  usuarios << nuevo_usuario # Añadir el nuevo usuario al array de usuarios
+  guardar_usuarios(usuarios) # Guardar el array actualizado en usuarios.json
+  usuario_actual = nuevo_usuario # Asignar para la sesión actual
+  puts "¡Usuario '#{username}' registrado con éxito!"
+
+end # Fin del if usuario_actual / else
 
 puts "-----------------------------------------------------"
-# (Aquí podríamos añadir la comprobación de bloqueo definitiva antes de continuar)
-
 puts "Escribe tus mensajes o '/quit' para salir."
 
 # 2. Iniciar el bucle principal
