@@ -11,7 +11,7 @@ ARCHIVO_USUARIOS = 'usuarios.json'
 
 # --- FUNCIONES ---
 
-# --- FUNCIONES PARA MENSAJES ---
+# --- 1. FUNCIONES PARA MENSAJES ---
 
 # Carga los mensajes desde el archivo JSON
 def cargar_mensajes
@@ -55,7 +55,7 @@ def mostrar_mensajes(mensajes)
   puts "------------\n"
 end
 
-# --- FUNCIONES PARA USUARIOS ---
+# --- 2. FUNCIONES PARA USUARIOS ---
 
 # Carga los usuarios desde el archivo JSON
 def cargar_usuarios
@@ -88,7 +88,6 @@ end
 
 puts "Ingresa tu nombre de usuario:"
 username = gets.chomp
-
 usuarios = cargar_usuarios # Cargar usuarios existentes
 
 # Buscar si el usuario ya existe en el array 'usuarios'
@@ -251,7 +250,7 @@ loop do
     else # En caso de que el usuario ejecutando la orden no es Administrador
       puts ">> Error: No tienes permisos para usar el comando /bloquear."
     end
-    next
+    next # Evita que el comando "/bloquear..." se guarde como un mensaje normal
         
   # Si el input es /desbloquear <username>, se desbloqueará el usuario especificado (SOLO ADMINISTRADOR PUEDE HACER ESTO)
   when /^\/desbloquear \S+$/ # Detecta /desbloquear, espacio, username
@@ -278,7 +277,7 @@ loop do
     else # En caso de que el usuario ejecutando la orden no es Administrador
       puts ">> Error: No tienes permisos para usar el comando /desbloquear."
     end
-    next
+    next # Evita que el comando "/desbloquear..." se guarde como un mensaje normal
 
   # Si el input no es /salir, /bloquear o /desbloquear y no está vacío, se tratará como un mensaje nuevo
   else
@@ -288,7 +287,6 @@ loop do
     # Crear el nuevo mensaje
     nueva_id = mensajes.empty? ? 1 : (mensajes.last['id'].to_i + 1)
     timestamp = Time.now.strftime('%Y-%m-%d %H:%M:%S') # Formato de fecha y hora
-
     nuevo_mensaje = {
       "id" => nueva_id,
       "username" => username, 
