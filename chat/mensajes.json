@@ -2,73 +2,7 @@
   {
     "id": 1,
     "username": "Alerce",
-    "timestamp": "2025-04-07 21:34:10",
-    "texto": "Hola! Este es mi chat"
-  },
-  {
-    "id": 3,
-    "username": "Alerce",
-    "timestamp": "2025-04-08 11:04:59",
-    "texto": "Si funciona :)"
-  },
-  {
-    "id": 4,
-    "username": "Alerce",
-    "timestamp": "2025-04-08 13:40:35",
-    "texto": "Comprobando usuarios"
-  },
-  {
-    "id": 5,
-    "username": "UsuarioPrueba",
-    "timestamp": "2025-04-08 13:41:05",
+    "timestamp": "2025-04-13 18:41:14",
     "texto": "Hola!"
-  },
-  {
-    "id": 6,
-    "username": "Alerce",
-    "timestamp": "2025-04-08 13:41:20",
-    "texto": "Hola :D"
-  },
-  {
-    "id": 7,
-    "username": "Fulano",
-    "timestamp": "2025-04-08 20:26:35",
-    "texto": "Huehuehuehuehuehuehuehuehue"
-  },
-  {
-    "id": 8,
-    "username": "Fulano",
-    "timestamp": "2025-04-08 20:26:39",
-    "texto": "LOL"
-  },
-  {
-    "id": 9,
-    "username": "Fulano",
-    "timestamp": "2025-04-08 20:26:43",
-    "texto": "YEEYEE"
-  },
-  {
-    "id": 10,
-    "username": "Alerce",
-    "timestamp": "2025-04-08 20:40:41",
-    "texto": "Hola UsuarioPrueba"
-  },
-  {
-    "id": 11,
-    "username": "UsuarioPrueba",
-    "timestamp": "2025-04-08 20:40:55",
-    "texto": "Hola de nuevo!"
-  },
-  {
-    "id": 12,
-    "username": "Yo",
-    "timestamp": "2025-04-09 19:09:00",
-    "texto": "Sup"
-  },
-  {
-    "id": 13,
-    "username": "Holo",
-    "timestamp": "2025-04-09 19:09:18",
-    "texto": "Yee"
   }
 ]
