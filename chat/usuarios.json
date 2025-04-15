@@ -34,5 +34,11 @@
     "password": "123",
     "es_admin": false,
     "bloqueado": false
+  },
+  {
+    "username": "newb",
+    "password": "123",
+    "es_admin": false,
+    "bloqueado": false
   }
 ]

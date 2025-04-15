@@ -1,9 +1,10 @@
+require_relative 'almacenamiento_json'
+require_relative 'usuario'
+require_relative 'mensaje'
+
 require 'json'
 require 'time'
 require 'io/console'
-
-require_relative 'usuario'
-require_relative 'mensaje'
 
 class ChatApp
   # --- Atributos (Estado de la Aplicación) ---
@@ -12,11 +13,10 @@ class ChatApp
   # --- Métodos Públicos ---
 
   def initialize(archivo_usuarios, archivo_mensajes)
-    @archivo_usuarios = archivo_usuarios
-    @archivo_mensajes = archivo_mensajes
-    @usuarios_objetos = [] # Array de objetos Usuario
-    @mensajes_objetos = [] # Array de objetos Mensaje
-    @usuario_actual = nil # Objeto Usuario que inició sesión
+    @almacenamiento = AlmacenamientoJSON.new(archivo_usuarios, archivo_mensajes)
+    @usuarios_objetos = []
+    @mensajes_objetos = []
+    @usuario_actual = nil
     cargar_datos_iniciales
   end
 
@@ -60,65 +60,40 @@ class ChatApp
 
   # Carga usuarios del JSON y los convierte en objetos Usuario
   def cargar_usuarios_como_objetos
-    hashes = cargar_hashes_desde_archivo(@archivo_usuarios)
-    hashes.map do |h|
+    hashes = @almacenamiento.cargar_usuarios_hash
+    hashes.map { |h|
       Usuario.new(
         username: h['username'],
         password: h['password'], 
         es_admin: h['es_admin'] || false, # Asegurar valor por defecto si falta
         bloqueado: h['bloqueado'] || false # Asegurar valor por defecto si falta
       )
-    end
+    }
   end
 
   # Carga mensajes del JSON y los convierte en objetos Mensaje
   def cargar_mensajes_como_objetos
-    hashes = cargar_hashes_desde_archivo(@archivo_mensajes)
-    hashes.map do |h|
+    hashes = @almacenamiento.cargar_mensajes_hash
+    hashes.map { |h|
       Mensaje.new(
         id: h['id'],
         username: h['username'],
         timestamp: h['timestamp'],
         texto: h['texto']
       )
-    end
-  end
-
-  # Lee un archivo JSON y devuelve un array de hashes
-  def cargar_hashes_desde_archivo(nombre_archivo)
-    if File.exist?(nombre_archivo) && !File.zero?(nombre_archivo)
-      begin
-        JSON.parse(File.read(nombre_archivo))
-      rescue JSON::ParserError => e
-        puts "Error al parsear #{nombre_archivo}: #{e.message}. Se devolverá lista vacía."
-        []
-      end
-    else
-      # No imprimir nada si el archivo no existe, es normal al empezar
-      []
-    end
+    }
   end
 
   # Guarda la lista actual de objetos Usuario en el archivo JSON
   def guardar_usuarios_desde_objetos
     hashes = @usuarios_objetos.map(&:to_hash) # Convierte objetos a hashes
-    guardar_hashes_a_archivo(@archivo_usuarios, hashes) # Llama al método genérico
+    @almacenamiento.guardar_usuarios_hash(hashes) # Llama al método genérico
   end
 
   # Guarda la lista actual de objetos Mensaje en el archivo JSON
   def guardar_mensajes_desde_objetos
     hashes = @mensajes_objetos.map(&:to_hash) # Convierte objetos a hashes
-    guardar_hashes_a_archivo(@archivo_mensajes, hashes) # Llama al método genérico
-  end
-
-  # Escribe un array de hashes en un archivo JSON
-  def guardar_hashes_a_archivo(nombre_archivo, datos_hashes)
-    json_data = JSON.pretty_generate(datos_hashes)
-    begin
-      File.write(nombre_archivo, json_data)
-    rescue StandardError => e
-      puts "Error al guardar en #{nombre_archivo}: #{e.message}"
-    end
+    @almacenamiento.guardar_mensajes_hash(hashes) # Llama al método genérico
   end
 
   # --- Lógica de Autenticación / Registro ---
@@ -167,7 +142,7 @@ class ChatApp
     end
   end
 
-# --- Lógica del Bucle Principal y Comandos ---
+  # --- Lógica del Bucle Principal y Comandos ---
 
   def main_loop
     loop do
@@ -202,7 +177,6 @@ class ChatApp
       puts "------------\n"
   end
 
-
   # Procesa el input del usuario y llama al manejador apropiado
   def procesar_input(texto)
     case texto
@@ -230,10 +204,10 @@ class ChatApp
       puts ">> Error al procesar ID: #{e.message}. Uso: /borrar <id_numerico>"; return
     end
 
-    # Usar reject! en la lista de objetos @mensajes_objetos
-    deleted_something = @mensajes_objetos.reject! { |msg_obj| msg_obj.id == id_mensaje_borrar }
+    # Usar reject! en la lista de objetos @mensajes_objetos para eliminar el mensaje
+    mensaje_borrado = @mensajes_objetos.reject! { |msg_obj| msg_obj.id == id_mensaje_borrar }
 
-    if deleted_something
+    if mensaje_borrado
       guardar_mensajes_desde_objetos # Guardar la lista modificada
       puts ">> Mensaje con ID #{id_mensaje_borrar} eliminado por Admin (#{@usuario_actual.username})."
     else
@@ -241,31 +215,29 @@ class ChatApp
     end
   end
 
-  def manejar_bloquear(comando)
+  def manejar_borrar(comando)
+    # Verificar permisos (usa método del objeto @usuario_actual)
     unless @usuario_actual.es_admin?
-      puts ">> Error: No tienes permisos para usar el comando /bloquear."; return
+      puts ">> Error: No tienes permisos para usar el comando /borrar."; return
     end
-
-    username_objetivo = comando.split(' ')[1]
-    if username_objetivo == @usuario_actual.username
-      puts ">> Error: No puedes bloquearte a ti mismo."; return
+  
+    # Extraer ID
+    begin
+      id_mensaje_borrar = comando.split(' ')[1].to_i
+    rescue StandardError => e
+      puts ">> Error al procesar ID: #{e.message}. Uso: /borrar <id_numerico>"; return
     end
-
-    # Buscar en la lista de OBJETOS @usuarios_objetos
-    usuario_objetivo_obj = @usuarios_objetos.find { |usr| usr.username == username_objetivo }
-
-    if usuario_objetivo_obj
-      if usuario_objetivo_obj.es_admin?
-        puts ">> Error: No puedes bloquear a otro administrador."
-      elsif usuario_objetivo_obj.esta_bloqueado?
-        puts ">> Info: El usuario '#{username_objetivo}' ya se encuentra bloqueado."
-      else
-        usuario_objetivo_obj.bloquear! # Llama al método del objeto Usuario
-        guardar_usuarios_desde_objetos # Guarda todos los usuarios
-        puts ">> ¡Usuario '#{username_objetivo}' ha sido BLOQUEADO por Admin (#{@usuario_actual.username})!"
-      end
+  
+    # --- Usar reject! directamente sobre la lista de OBJETOS en memoria ---
+    mensaje_borrado = @mensajes_objetos.reject! { |msg_obj| msg_obj.id == id_mensaje_borrar }
+  
+    if mensaje_borrado # Si se borró algo de la lista @mensajes_objetos...
+      # ...llamar al método que convierte objetos a hash y usa @almacenamiento para guardar
+      guardar_mensajes_desde_objetos
+      puts ">> Mensaje con ID #{id_mensaje_borrar} eliminado por Admin (#{@usuario_actual.username})."
     else
-      puts ">> Error: Usuario '#{username_objetivo}' no encontrado."
+      # Si no se borró nada de la lista en memoria (no se encontró ID)
+      puts ">> Error: No se encontró mensaje con ID #{id_mensaje_borrar}."
     end
   end
 
@@ -291,8 +263,8 @@ class ChatApp
   end
 
   def manejar_nuevo_mensaje(texto_mensaje)
-     # Calcular nueva ID (podría mejorarse)
-     hashes_msg = cargar_hashes_desde_archivo(@archivo_mensajes)
+     # Calcular nueva ID
+     hashes_msg = @almacenamiento.cargar_mensajes_hash
      nueva_id = hashes_msg.empty? ? 1 : (hashes_msg.last['id'].to_i + 1)
      timestamp = Time.now.strftime('%Y-%m-%d %H:%M:%S')
 
