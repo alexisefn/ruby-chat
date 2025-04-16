@@ -45,7 +45,7 @@ class ChatApp
   end
 
   # --- Métodos Privados ---
-  # La lógica interna de la aplicación va aquí
+
   private
 
   # --- Carga y Guardado de Datos ---
@@ -161,18 +161,11 @@ class ChatApp
   # Muestra los mensajes (recargando la lista de objetos)
   def mostrar_mensajes_actuales
      @mensajes_objetos = cargar_mensajes_como_objetos # Recargar para ver cambios
-     # Llama a la función global (o podríamos integrar la lógica aquí)
-     mostrar_mensajes_func_global(@mensajes_objetos)
-  end
-
-  # Función para mostrar mensajes (adaptada de la global original)
-  # Podría estar fuera de la clase o aquí como privada.
-  def mostrar_mensajes_func_global(mensajes_objetos)
-      puts "\n--- Chat ---"
-      if mensajes_objetos.empty?
+     puts "\n--- Chat ---"
+      if @mensajes_objetos.empty?
         puts "No hay mensajes todavía."
       else
-        mensajes_objetos.each { |msg_obj| puts msg_obj } # Lista cada mensaje guardado
+        @mensajes_objetos.each { |msg_obj| puts msg_obj } # Lista cada mensaje guardado
       end
       puts "------------\n"
   end
@@ -231,8 +224,8 @@ end
     id_mensaje_borrar = id_str.to_i
   
     # --- Lógica de borrado (SIN el check de admin) ---
-    deleted_something = @mensajes_objetos.reject! { |msg_obj| msg_obj.id == id_mensaje_borrar }
-    if deleted_something
+    mensaje_borrado = @mensajes_objetos.reject! { |msg_obj| msg_obj.id == id_mensaje_borrar }
+    if mensaje_borrado
       guardar_mensajes_desde_objetos
       puts ">> Mensaje con ID #{id_mensaje_borrar} eliminado por Admin (#{@usuario_actual.username})."
     else
