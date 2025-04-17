@@ -7,6 +7,12 @@ require 'time'
 require 'io/console'
 
 class ChatApp
+  # --- Constantes para Comandos ---
+  COMANDO_SALIR = "/salir".freeze
+  COMANDO_BORRAR = "/borrar".freeze
+  COMANDO_BLOQUEAR = "/bloquear".freeze
+  COMANDO_DESBLOQUEAR = "/desbloquear".freeze
+
   # --- Atributos (Estado de la Aplicación) ---
   attr_reader :usuario_actual # Podríamos necesitar leer quién es el usuario actual desde fuera
 
@@ -179,14 +185,14 @@ def procesar_input(texto)
   argumento = partes[1] # Será nil si no hay espacio después del comando
 
   case comando_base
-  when "/salir"
+  when COMANDO_SALIR
     return :salir # Señal para que main_loop termine
 
   when ""
     return nil # Ignorar línea vacía
 
   # --- Comandos que requieren ser Admin ---
-  when "/borrar", "/bloquear", "/desbloquear"
+  when COMANDO_BORRAR, COMANDO_BLOQUEAR, COMANDO_DESBLOQUEAR
     # 1. Verificar Admin PRIMERO
     unless @usuario_actual.es_admin?
       puts ">> Error: No tienes permisos para usar el comando '#{comando_base}'."
@@ -195,11 +201,11 @@ def procesar_input(texto)
 
     # 2. Si es Admin, llamar al handler específico pasando el argumento
     case comando_base
-    when "/borrar"
+    when COMANDO_BORRAR
       manejar_borrar(argumento) # Pasar el string del ID (o nil)
-    when "/bloquear"
+    when COMANDO_BLOQUEAR
       manejar_bloquear(argumento) # Pasar el string del username (o nil)
-    when "/desbloquear"
+    when COMANDO_DESBLOQUEAR
       manejar_desbloquear(argumento) # Pasar el string del username (o nil)
     end
 
@@ -284,14 +290,22 @@ end
 end
 
   def manejar_nuevo_mensaje(texto_mensaje)
-     # Calcular nueva ID
-     hashes_msg = @almacenamiento.cargar_mensajes_hash
-     nueva_id = hashes_msg.empty? ? 1 : (hashes_msg.last['id'].to_i + 1)
-     timestamp = Time.now.strftime('%Y-%m-%d %H:%M:%S')
+     # --- Calcular nueva ID usando objetos en memoria ---
+    ultimo_mensaje_obj = @mensajes_objetos.last # Obtiene el último objeto Mensaje del array en memoria, o nil si está vacío
+
+    # Si hay un último mensaje (el array no estaba vacío),
+    # toma su ID, conviértelo a entero por seguridad, y suma 1.
+    # Si no hay último mensaje (el array estaba vacío), el nuevo ID es 1.
+    nueva_id = ultimo_mensaje_obj ? (ultimo_mensaje_obj.id.to_i + 1) : 1
+    
+    timestamp = Time.now.strftime('%Y-%m-%d %H:%M:%S')
 
      # Crear objeto Mensaje
      nuevo_mensaje_obj = Mensaje.new(
-       id: nueva_id, username: @usuario_actual.username, timestamp: timestamp, texto: texto_mensaje
+       id: nueva_id, 
+       username: @usuario_actual.username, 
+       timestamp: timestamp, 
+       texto: texto_mensaje
      )
 
      # Añadir a la lista en memoria y guardar en archivo
