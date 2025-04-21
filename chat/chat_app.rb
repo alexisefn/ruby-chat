@@ -3,20 +3,20 @@ require_relative 'usuario'
 require_relative 'mensaje'
 
 require 'json'
-require 'time'
-require 'io/console'
+require 'time'        # Para las marcas de tiempo
+require 'io/console'  # Para ocultar contraseñas al ingresarlas
 
 class ChatApp
-  # --- Constantes para Comandos ---
-  COMANDO_SALIR = "/salir".freeze
+  # --- CONSTANTES PARA COMANDOS ---
+  COMANDO_SALIR = "/salir".freeze # .freeze = evita posibles modificaciones de constantes
   COMANDO_BORRAR = "/borrar".freeze
   COMANDO_BLOQUEAR = "/bloquear".freeze
   COMANDO_DESBLOQUEAR = "/desbloquear".freeze
 
-  # --- Atributos (Estado de la Aplicación) ---
-  attr_reader :usuario_actual # Podríamos necesitar leer quién es el usuario actual desde fuera
+  # --- ATRIBUTOS (Estado de la Aplicación) ---
+  attr_reader :usuario_actual # Para leer quién es el usuario actual desde fuera de chat_app.rb
 
-  # --- Métodos Públicos ---
+  # --- MÉTODOS PÚBLICOS ---
 
   def initialize(archivo_usuarios, archivo_mensajes)
     @almacenamiento = AlmacenamientoJSON.new(archivo_usuarios, archivo_mensajes)
@@ -26,13 +26,14 @@ class ChatApp
     cargar_datos_iniciales
   end
 
-  # Punto de entrada principal para correr la aplicación
+  # Punto de entrada principal para ejecutar la aplicación
   def ejecutar
     puts "-----------------------------------------------------"
     puts "¡Bienvenido!"
     puts "-----------------------------------------------------"
 
-    iniciar_sesion_o_registrar # Llama al método privado de autenticación/registro
+    # Llama al método privado de autenticación/registro
+    iniciar_sesion_o_registrar
 
     # Salir si el inicio de sesión / registro falló (usuario bloqueado, pass incorrecta, etc.)
     unless @usuario_actual
@@ -42,20 +43,19 @@ class ChatApp
 
     # Si el login fue exitoso, iniciar el bucle principal
     puts "-----------------------------------------------------"
-    puts "Autenticación exitosa como: #{@usuario_actual.username}"
+    puts "¡Hola: #{@usuario_actual.username}!"
     puts "Escribe tus mensajes o '/salir' para salir."
     puts "-----------------------------------------------------"
 
-    main_loop # Llamar al bucle principal del chat
+    # Llamar al bucle principal del chat
+    main_loop
 
   end
 
-  # --- Métodos Privados ---
-
+  # --- MÉTODOS PRIVADOS ---
   private
 
-  # --- Carga y Guardado de Datos ---
-
+  # --- CARGA Y GUARDADO DE DATOS (Usuario y Mensaje)
   def cargar_datos_iniciales
     puts "Cargando datos..."
     # Carga usuarios y mensajes, convirtiéndolos a objetos
@@ -102,17 +102,18 @@ class ChatApp
     @almacenamiento.guardar_mensajes_hash(hashes) # Llama al método genérico
   end
 
-  # --- Lógica de Autenticación / Registro ---
+  # --- AUTENTICACIÓN Y REGISTRO ---
 
   def iniciar_sesion_o_registrar
     puts "\n--- Autenticación ---"
     print "Ingresa tu nombre de usuario: "
     username = gets.chomp
 
-    # Busca en la lista de OBJETOS Usuario cargada en @usuarios_objetos
+    # Busca en la lista de Objetos Usuario cargada en @usuarios_objetos
     usuario_encontrado = @usuarios_objetos.find { |usr_obj| usr_obj.username == username }
 
-    if usuario_encontrado # Usuario Existe
+    # Si el Usuario existe, pedirá las credenciales de la cuenta
+    if usuario_encontrado
       puts "Usuario '#{username}' encontrado."
       if usuario_encontrado.esta_bloqueado?
         puts "ACCESO DENEGADO: El usuario '#{username}' está bloqueado."; return
@@ -127,7 +128,8 @@ class ChatApp
       else
         puts "ACCESO DENEGADO: Contraseña incorrecta."; return
       end
-    else # Usuario Nuevo
+    # Si no encuentra el Usuario, se le pedirá registrarse
+    else
       puts "Usuario nuevo '#{username}'. Creando cuenta..."
       password = ""
       loop do
@@ -140,6 +142,7 @@ class ChatApp
         end
       end
 
+      # Guarda los datos del nuevo usuario en la base de datos
       nuevo_usuario_obj = Usuario.new(username: username, password: password) # Defaults: es_admin=false, bloqueado=false
       @usuarios_objetos << nuevo_usuario_obj # Añade el objeto a la lista en memoria
       guardar_usuarios_desde_objetos      # Guarda la lista actualizada en el archivo
@@ -148,8 +151,9 @@ class ChatApp
     end
   end
 
-  # --- Lógica del Bucle Principal y Comandos ---
+  # --- INTERFAZ (Menú Principal) ---
 
+  # Muestra los mensajes guardados y se le pide que ingrese una entrada (mensaje o comando)
   def main_loop
     loop do
       mostrar_mensajes_actuales
@@ -175,52 +179,53 @@ class ChatApp
       end
       puts "------------\n"
   end
-
-# Procesa el input del usuario, valida permisos y delega a los handlers
-def procesar_input(texto)
-  # Dividir el input en el comando base y el resto como argumento
-  # split(' ', 2) divide en máximo 2 partes en el primer espacio
-  partes = texto.strip.split(' ', 2)
-  comando_base = partes[0]
-  argumento = partes[1] # Será nil si no hay espacio después del comando
-
-  case comando_base
-  when COMANDO_SALIR
-    return :salir # Señal para que main_loop termine
-
-  when ""
-    return nil # Ignorar línea vacía
-
-  # --- Comandos que requieren ser Admin ---
-  when COMANDO_BORRAR, COMANDO_BLOQUEAR, COMANDO_DESBLOQUEAR
-    # 1. Verificar Admin PRIMERO
-    unless @usuario_actual.es_admin?
-      puts ">> Error: No tienes permisos para usar el comando '#{comando_base}'."
-      return nil # Salir de procesar_input si no es admin
-    end
-
-    # 2. Si es Admin, llamar al handler específico pasando el argumento
+  
+  # Procesa el input del usuario, valida permisos y delega a los handlers
+  def procesar_input(texto)
+    # Dividir el input en el comando base y el resto como argumento
+    # split(' ', 2) divide en máximo 2 partes en el primer espacio
+    partes = texto.strip.split(' ', 2)
+    comando_base = partes[0]
+    argumento = partes[1] # Será nil si no hay espacio después del comando
+    
     case comando_base
-    when COMANDO_BORRAR
-      manejar_borrar(argumento) # Pasar el string del ID (o nil)
-    when COMANDO_BLOQUEAR
-      manejar_bloquear(argumento) # Pasar el string del username (o nil)
-    when COMANDO_DESBLOQUEAR
-      manejar_desbloquear(argumento) # Pasar el string del username (o nil)
+    when COMANDO_SALIR
+      return :salir # Señal para que main_loop termine
+    
+    when ""
+      return nil # Ignorar línea vacía
+
+    # Comandos que requieren ser Admin
+    when COMANDO_BORRAR, COMANDO_BLOQUEAR, COMANDO_DESBLOQUEAR
+      # Verificar si es Administrador
+      unless @usuario_actual.es_admin?
+        puts ">> Error: No tienes permisos para usar el comando '#{comando_base}'."
+        return nil # Salir de procesar_input si no es admin
+      end
+      
+      # Si es Administrador, llamará al método "Handler" específico pasando el argumento
+      case comando_base
+      when COMANDO_BORRAR
+        manejar_borrar(argumento) # Pasar el string del ID (o nil)
+      when COMANDO_BLOQUEAR
+        manejar_bloquear(argumento) # Pasar el string del username (o nil)
+      when COMANDO_DESBLOQUEAR
+        manejar_desbloquear(argumento) # Pasar el string del username (o nil)
+      end
+      
+    # Comandos que no requieren ser Admin
+    else
+      # Si no es un comando conocido, lo tratamos como un mensaje nuevo
+      # Podríamos añadir más comandos públicos aquí después (ej /help)
+      manejar_nuevo_mensaje(texto) # Pasamos el texto completo original
     end
-
-  # --- Comandos que no requieren ser Admin (o mensajes) ---
-  else
-    # Si no es un comando conocido, lo tratamos como un mensaje nuevo
-    # Podríamos añadir más comandos públicos aquí después (ej /help)
-    manejar_nuevo_mensaje(texto) # Pasamos el texto completo original
+    
+    return nil # Por defecto, indica a main_loop que continúe
   end
+  
+  # --- MÉTODOS "HANDLER" (Para comando/acción) ---
 
-  return nil # Por defecto, indica a main_loop que continúe
-end
-
-  # --- Métodos "Handler" para cada comando/acción ---
-
+  # --- BORRAR MENSAJE ---
   def manejar_borrar(id_str) # Recibe el argumento (string del ID o nil)
     # Validar argumento primero
     if id_str.nil? || !id_str.match?(/^\d+$/)
@@ -228,8 +233,8 @@ end
       return # Salir del método si el argumento es inválido
     end
     id_mensaje_borrar = id_str.to_i
-  
-    # --- Lógica de borrado (SIN el check de admin) ---
+
+    # Borra mensaje indicado y actualiza listado de mensajes guardados
     mensaje_borrado = @mensajes_objetos.reject! { |msg_obj| msg_obj.id == id_mensaje_borrar }
     if mensaje_borrado
       guardar_mensajes_desde_objetos
@@ -239,78 +244,83 @@ end
     end
   end
 
+  # --- BLOQUEAR USUARIO ---
   def manejar_bloquear(username_objetivo) # Recibe el argumento (username o nil)
     # Validar argumento primero
-   if username_objetivo.nil? || username_objetivo.empty? || username_objetivo.include?(' ')
-     puts ">> Error: Comando /bloquear requiere un nombre de usuario válido. Uso: /bloquear <username>"
-     return
-   end
+    if username_objetivo.nil? || username_objetivo.empty? || username_objetivo.include?(' ')
+      puts ">> Error: Comando /bloquear requiere un nombre de usuario válido. Uso: /bloquear <username>"
+      return
+    end
+    
+    # Verificar que usuario a bloquear no sea uno mismo
+    if username_objetivo == @usuario_actual.username
+      puts ">> Error: No puedes bloquearte a ti mismo."; return
+    end
  
-   # --- Lógica de bloqueo (SIN el check de admin) ---
-   if username_objetivo == @usuario_actual.username
-     puts ">> Error: No puedes bloquearte a ti mismo."; return
-   end
- 
-   usuario_objetivo_obj = @usuarios_objetos.find { |usr| usr.username == username_objetivo }
-   if usuario_objetivo_obj
-     if usuario_objetivo_obj.es_admin?
-       puts ">> Error: No puedes bloquear a otro administrador."
-     elsif usuario_objetivo_obj.esta_bloqueado?
-       puts ">> Info: El usuario '#{username_objetivo}' ya se encuentra bloqueado."
-     else
-       usuario_objetivo_obj.bloquear!
-       guardar_usuarios_desde_objetos
-       puts ">> ¡Usuario '#{username_objetivo}' ha sido BLOQUEADO por Admin (#{@usuario_actual.username})!"
-     end
-   else
-     puts ">> Error: Usuario '#{username_objetivo}' no encontrado."
-   end
- end
-
- def manejar_desbloquear(username_objetivo) # Recibe el argumento (username o nil)
-  # Validar argumento primero
- if username_objetivo.nil? || username_objetivo.empty? || username_objetivo.include?(' ')
-   puts ">> Error: Comando /desbloquear requiere un nombre de usuario válido. Uso: /desbloquear <username>"
-   return
- end
-
- # --- Lógica de desbloqueo (SIN el check de admin) ---
- usuario_objetivo_obj = @usuarios_objetos.find { |usr| usr.username == username_objetivo }
- if usuario_objetivo_obj
-   if !usuario_objetivo_obj.esta_bloqueado?
-      puts ">> Info: El usuario '#{username_objetivo}' no está bloqueado."
-   else
-     usuario_objetivo_obj.desbloquear!
-     guardar_usuarios_desde_objetos
-     puts ">> ¡Usuario '#{username_objetivo}' ha sido DESBLOQUEADO por Admin (#{@usuario_actual.username})!"
-   end
- else
-   puts ">> Error: Usuario '#{username_objetivo}' no encontrado."
- end
-end
-
+    # Busca el Usuario a bloquear en la base de datos
+    usuario_objetivo_obj = @usuarios_objetos.find { |usr| usr.username == username_objetivo }
+    if usuario_objetivo_obj # En caso de que encuentre al usuario
+      if usuario_objetivo_obj.es_admin?
+        puts ">> Error: No puedes bloquear a otro administrador."
+      elsif usuario_objetivo_obj.esta_bloqueado?
+        puts ">> Info: El usuario '#{username_objetivo}' ya se encuentra bloqueado."
+      else
+        usuario_objetivo_obj.bloquear!
+        guardar_usuarios_desde_objetos
+        puts ">> ¡Usuario '#{username_objetivo}' ha sido BLOQUEADO por Admin (#{@usuario_actual.username})!"
+      end
+    else # En caso de que el usuario no exista en la base de datos
+      puts ">> Error: Usuario '#{username_objetivo}' no encontrado."
+    end
+  end
+  
+  # --- DESBLOQUEAR USUARIO ---
+  def manejar_desbloquear(username_objetivo) # Recibe el argumento (username o nil)
+    # Validar argumento primero
+    if username_objetivo.nil? || username_objetivo.empty? || username_objetivo.include?(' ')
+      puts ">> Error: Comando /desbloquear requiere un nombre de usuario válido. Uso: /desbloquear <username>"
+      return
+    end
+    
+    # Busca el Usuario a bloquear en la base de datos
+    usuario_objetivo_obj = @usuarios_objetos.find { |usr| usr.username == username_objetivo }
+    if usuario_objetivo_obj
+      if !usuario_objetivo_obj.esta_bloqueado?
+        puts ">> Info: El usuario '#{username_objetivo}' no está bloqueado."
+      else
+        usuario_objetivo_obj.desbloquear!
+        guardar_usuarios_desde_objetos
+        puts ">> ¡Usuario '#{username_objetivo}' ha sido DESBLOQUEADO por Admin (#{@usuario_actual.username})!"
+      end
+    else # En caso de que el usuario no exista en la base de datos
+      puts ">> Error: Usuario '#{username_objetivo}' no encontrado."
+    end
+  end
+  
+  # --- NUEVO MENSAJE ---
   def manejar_nuevo_mensaje(texto_mensaje)
-     # --- Calcular nueva ID usando objetos en memoria ---
+    # Calcular nueva ID usando objetos en memoria
     ultimo_mensaje_obj = @mensajes_objetos.last # Obtiene el último objeto Mensaje del array en memoria, o nil si está vacío
 
     # Si hay un último mensaje (el array no estaba vacío),
-    # toma su ID, conviértelo a entero por seguridad, y suma 1.
+    # se toma su ID, se convierte a entero por seguridad, y suma +1.
     # Si no hay último mensaje (el array estaba vacío), el nuevo ID es 1.
     nueva_id = ultimo_mensaje_obj ? (ultimo_mensaje_obj.id.to_i + 1) : 1
     
+    # Guarda la fecha y hora del mensaje
     timestamp = Time.now.strftime('%Y-%m-%d %H:%M:%S')
-
-     # Crear objeto Mensaje
-     nuevo_mensaje_obj = Mensaje.new(
-       id: nueva_id, 
-       username: @usuario_actual.username, 
-       timestamp: timestamp, 
-       texto: texto_mensaje
-     )
-
-     # Añadir a la lista en memoria y guardar en archivo
-     @mensajes_objetos << nuevo_mensaje_obj
-     guardar_mensajes_desde_objetos
+    
+    # Crear objeto Mensaje
+    nuevo_mensaje_obj = Mensaje.new(
+      id: nueva_id, 
+      username: @usuario_actual.username, 
+      timestamp: timestamp, 
+      texto: texto_mensaje
+    )
+    
+    # Añadir a la lista en memoria y guardar en archivo
+    @mensajes_objetos << nuevo_mensaje_obj
+    guardar_mensajes_desde_objetos
   end
 
 end # Fin de la clase ChatApp

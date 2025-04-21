@@ -4,41 +4,5 @@
     "password": "abc",
     "es_admin": true,
     "bloqueado": false
-  },
-  {
-    "username": "UsuarioPrueba",
-    "password": "123",
-    "es_admin": false,
-    "bloqueado": false
-  },
-  {
-    "username": "Fulano",
-    "password": "123",
-    "es_admin": false,
-    "bloqueado": true
-  },
-  {
-    "username": "Yo",
-    "password": "123",
-    "es_admin": false,
-    "bloqueado": false
-  },
-  {
-    "username": "Holo",
-    "password": "123",
-    "es_admin": false,
-    "bloqueado": true
-  },
-  {
-    "username": "noob",
-    "password": "123",
-    "es_admin": false,
-    "bloqueado": false
-  },
-  {
-    "username": "newb",
-    "password": "123",
-    "es_admin": false,
-    "bloqueado": false
   }
 ]

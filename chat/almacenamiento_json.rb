@@ -7,7 +7,7 @@ class AlmacenamientoJSON
     @archivo_mensajes = archivo_mensajes
   end
 
-  # --- Métodos Públicos (La interfaz para ChatApp) ---
+  # --- MÉTODOS PÚBLICOS (La interfaz para ChatApp) ---
 
   # Lee usuarios.json, parsea y devuelve array de hashes
   def cargar_usuarios_hash
@@ -29,11 +29,10 @@ class AlmacenamientoJSON
     guardar_hashes_a_archivo(@archivo_mensajes, mensajes_hashes)
   end
 
-  # --- Métodos Privados (Implementación interna) ---
+  # --- MÉTODOS PRIVADOS (Implementación interna) ---
   private
 
   # Lógica genérica para leer y parsear un archivo JSON
-  # (Esta es la lógica que movimos desde ChatApp)
   def cargar_hashes_desde_archivo(nombre_archivo)
     if File.exist?(nombre_archivo) && !File.zero?(nombre_archivo)
       begin
@@ -47,14 +46,12 @@ class AlmacenamientoJSON
         puts "[AlmacenamientoJSON] Error al leer #{nombre_archivo}: #{e.message}. Se devolverá lista vacía."
         []
       end
-    else
-      # Archivo no existe o vacío, devolver array vacío sin mensaje
+    else # Archivo no existe o vacío, devolver array vacío sin mensaje
       []
     end
   end
 
   # Lógica genérica para escribir un array de hashes en un archivo JSON
-  # (Esta es la lógica que movimos desde ChatApp)
   def guardar_hashes_a_archivo(nombre_archivo, datos_hashes)
     # Aseguramos que no sea nil para evitar errores con pretty_generate
     datos_hashes ||= []

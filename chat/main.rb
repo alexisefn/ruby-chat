@@ -4,7 +4,7 @@
 # Carga la definición de la clase principal de la aplicación
 require_relative 'chat_app'
 
-# Define constantes para los archivos de datos
+# Constantes para los archivos de datos
 ARCHIVO_MENSAJES = 'mensajes.json'
 ARCHIVO_USUARIOS = 'usuarios.json'
 
