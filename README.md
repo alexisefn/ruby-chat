@@ -1,2 +1,2 @@
 # ¡Hola!
-Registrando mis progresos aprendiendo Ruby.
+Aquí estoy registrando mis progresos aprendiendo Ruby.
