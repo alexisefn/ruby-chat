@@ -16,5 +16,11 @@
     "username": "luna",
     "timestamp": "2025-06-03 14:53:26",
     "texto": "/exit"
+  },
+  {
+    "id": 4,
+    "username": "Testing",
+    "timestamp": "2025-06-03 16:44:19",
+    "texto": "sup"
   }
 ]

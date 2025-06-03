@@ -2,11 +2,11 @@
 # Chat en Ruby (Animo!) 
 
 # Carga la definición de la clase principal de la aplicación
-require_relative 'chat_app'
+require_relative 'lib/chat_app'
 
 # Constantes para los archivos de datos
-ARCHIVO_MENSAJES = 'mensajes.json'
-ARCHIVO_USUARIOS = 'usuarios.json'
+ARCHIVO_MENSAJES = 'db/mensajes.json'
+ARCHIVO_USUARIOS = 'db/usuarios.json'
 
 # Crea una instancia de la aplicación ChatApp
 # Al crearla, se ejecutará su método initialize (que carga datos).
