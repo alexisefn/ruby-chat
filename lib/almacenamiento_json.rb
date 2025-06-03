@@ -1,3 +1,5 @@
+# 'lib/almacenamiento_json.rb'
+
 require 'json' # Necesitamos JSON aquí para parsear y generar
 
 class AlmacenamientoJSON

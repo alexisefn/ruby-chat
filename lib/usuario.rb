@@ -1,3 +1,5 @@
+# 'lib/usuario.rb'
+
 class Usuario
   # --- ATRIBUTOS ---
   attr_reader :username, :es_admin # Crea métodos para leer las instancias desde fuera, no cambiarlas directamente.

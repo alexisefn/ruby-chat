@@ -1,6 +1,8 @@
 # 07/04/2025
 # Chat en Ruby (Animo!) 
 
+# 'main.rb'
+
 # Carga la definición de la clase principal de la aplicación
 require_relative 'lib/chat_app'
 

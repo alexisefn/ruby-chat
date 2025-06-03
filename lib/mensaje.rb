@@ -1,3 +1,5 @@
+# 'lib/mensaje.rb'
+
 class Mensaje
   # --- ATRIBUTOS ---
   # Los mensajes generalmente no cambian una vez creados,
