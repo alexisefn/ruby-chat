@@ -8,5 +8,15 @@
     "id": 2,
     "nombre": "Persona Vieja",
     "edad": 22
+  },
+  {
+    "id": 3,
+    "nombre": "Woona",
+    "edad": 1000
+  },
+  {
+    "id": 4,
+    "nombre": "Sunny",
+    "edad": 1000
   }
 ]

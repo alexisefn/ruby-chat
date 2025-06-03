@@ -1,5 +1,5 @@
 # 24/03/2025
-# Mi tercer programa creado con Ruby ಠ_ಠ !
+# Mi tercer programa creado con Ruby !
 
 require_relative 'gestor_usuarios'
 

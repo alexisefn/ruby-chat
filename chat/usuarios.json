@@ -4,5 +4,11 @@
     "password": "abc",
     "es_admin": true,
     "bloqueado": false
+  },
+  {
+    "username": "luna",
+    "password": "1234",
+    "es_admin": false,
+    "bloqueado": false
   }
 ]

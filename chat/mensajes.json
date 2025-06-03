@@ -4,5 +4,17 @@
     "username": "Alerce",
     "timestamp": "2025-04-13 18:41:14",
     "texto": "Hola!"
+  },
+  {
+    "id": 2,
+    "username": "luna",
+    "timestamp": "2025-06-03 14:53:19",
+    "texto": "Hola :)"
+  },
+  {
+    "id": 3,
+    "username": "luna",
+    "timestamp": "2025-06-03 14:53:26",
+    "texto": "/exit"
   }
 ]
