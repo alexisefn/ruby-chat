@@ -1,0 +1,13 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    sqlite3 (2.6.0-x64-mingw-ucrt)
+
+PLATFORMS
+  x64-mingw-ucrt
+
+DEPENDENCIES
+  sqlite3
+
+BUNDLED WITH
+   2.6.9
