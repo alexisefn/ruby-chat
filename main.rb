@@ -6,13 +6,9 @@
 # Carga la definición de la clase principal de la aplicación
 require_relative 'lib/chat_app'
 
-# Constantes para los archivos de datos
-ARCHIVO_MENSAJES = 'db/mensajes.json'
-ARCHIVO_USUARIOS = 'db/usuarios.json'
-
 # Crea una instancia de la aplicación ChatApp
 # Al crearla, se ejecutará su método initialize (que carga datos).
-app = ChatApp.new(ARCHIVO_USUARIOS, ARCHIVO_MENSAJES)
+app = ChatApp.new
 
 # Llama al método público 'ejecutar' para iniciar la lógica principal
 # (login/registro y luego el bucle principal del chat).

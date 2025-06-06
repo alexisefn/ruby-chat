@@ -1,10 +1,9 @@
 # 'lib/chat_app.rb'
 
-require_relative 'almacenamiento_json'
+require_relative 'almacenamiento_db'
 require_relative 'usuario'
 require_relative 'mensaje'
 
-require 'json'
 require 'time'        # Para las marcas de tiempo
 require 'io/console'  # Para ocultar contraseñas al ingresarlas
 
@@ -20,8 +19,8 @@ class ChatApp
 
   # --- MÉTODOS PÚBLICOS ---
 
-  def initialize(archivo_usuarios, archivo_mensajes)
-    @almacenamiento = AlmacenamientoJSON.new(archivo_usuarios, archivo_mensajes)
+  def initialize
+    @almacenamiento = AlmacenamientoDB.new
     @usuarios_objetos = []
     @mensajes_objetos = []
     @usuario_actual = nil
@@ -66,20 +65,20 @@ class ChatApp
     puts "Datos cargados: #{@usuarios_objetos.count} usuarios, #{@mensajes_objetos.count} mensajes."
   end
 
-  # Carga usuarios del JSON y los convierte en objetos Usuario
+  # Carga usuarios de la base de datos y los convierte en objetos Usuario
   def cargar_usuarios_como_objetos
     hashes = @almacenamiento.cargar_usuarios_hash
     hashes.map { |h|
       Usuario.new(
         username: h['username'],
         password: h['password'], 
-        es_admin: h['es_admin'] || false, # Asegurar valor por defecto si falta
-        bloqueado: h['bloqueado'] || false # Asegurar valor por defecto si falta
+        es_admin: h['es_admin'],
+        bloqueado: h['bloqueado']
       )
     }
   end
 
-  # Carga mensajes del JSON y los convierte en objetos Mensaje
+  # Carga mensajes de la base de datos y los convierte en objetos Mensaje
   def cargar_mensajes_como_objetos
     hashes = @almacenamiento.cargar_mensajes_hash
     hashes.map { |h|
@@ -90,18 +89,6 @@ class ChatApp
         texto: h['texto']
       )
     }
-  end
-
-  # Guarda la lista actual de objetos Usuario en el archivo JSON
-  def guardar_usuarios_desde_objetos
-    hashes = @usuarios_objetos.map(&:to_hash) # Convierte objetos a hashes
-    @almacenamiento.guardar_usuarios_hash(hashes) # Llama al método genérico
-  end
-
-  # Guarda la lista actual de objetos Mensaje en el archivo JSON
-  def guardar_mensajes_desde_objetos
-    hashes = @mensajes_objetos.map(&:to_hash) # Convierte objetos a hashes
-    @almacenamiento.guardar_mensajes_hash(hashes) # Llama al método genérico
   end
 
   # --- AUTENTICACIÓN Y REGISTRO ---
@@ -144,12 +131,16 @@ class ChatApp
         end
       end
 
+      nuevo_usuario_obj = Usuario.new(username: username, password: password)
       # Guarda los datos del nuevo usuario en la base de datos
-      nuevo_usuario_obj = Usuario.new(username: username, password: password) # Defaults: es_admin=false, bloqueado=false
-      @usuarios_objetos << nuevo_usuario_obj # Añade el objeto a la lista en memoria
-      guardar_usuarios_desde_objetos      # Guarda la lista actualizada en el archivo
-      @usuario_actual = nuevo_usuario_obj # Asigna el nuevo objeto
-      puts "¡Usuario '#{username}' registrado con éxito!"
+      if @almacenamiento.agregar_usuario_obj(nuevo_usuario_obj)
+        @usuarios_objetos << nuevo_usuario_obj # Añadir a la lista en memoria
+        @usuario_actual = nuevo_usuario_obj
+        puts "¡Usuario '#{username}' registrado con éxito!" # 
+      else
+        puts "Error al registrar el usuario '#{username}'. Es posible que ya exista en la BD."
+        # @usuario_actual permanecerá nil, y la app saldrá como antes.
+      end
     end
   end
 
@@ -236,13 +227,13 @@ class ChatApp
     end
     id_mensaje_borrar = id_str.to_i
 
-    # Borra mensaje indicado y actualiza listado de mensajes guardados
-    mensaje_borrado = @mensajes_objetos.reject! { |msg_obj| msg_obj.id == id_mensaje_borrar }
-    if mensaje_borrado
-      guardar_mensajes_desde_objetos
+    # Borra de la base de datos y luego actualizar la lista en memoria
+    if @almacenamiento.borrar_mensaje_por_id(id_mensaje_borrar)
+      # Actualizar la lista en memoria
+      @mensajes_objetos.reject! { |msg_obj| msg_obj.id == id_mensaje_borrar } # 
       puts ">> Mensaje con ID #{id_mensaje_borrar} eliminado por Admin (#{@usuario_actual.username})."
     else
-      puts ">> Error: No se encontró mensaje con ID #{id_mensaje_borrar}."
+      puts ">> Error: No se encontró mensaje con ID #{id_mensaje_borrar} o no se pudo borrar."
     end
   end
 
@@ -268,7 +259,7 @@ class ChatApp
         puts ">> Info: El usuario '#{username_objetivo}' ya se encuentra bloqueado."
       else
         usuario_objetivo_obj.bloquear!
-        guardar_usuarios_desde_objetos
+        @almacenamiento.actualizar_usuario_obj(usuario_objetivo_obj) #Guardar cambio en base de datos
         puts ">> ¡Usuario '#{username_objetivo}' ha sido BLOQUEADO por Admin (#{@usuario_actual.username})!"
       end
     else # En caso de que el usuario no exista en la base de datos
@@ -291,7 +282,7 @@ class ChatApp
         puts ">> Info: El usuario '#{username_objetivo}' no está bloqueado."
       else
         usuario_objetivo_obj.desbloquear!
-        guardar_usuarios_desde_objetos
+        @almacenamiento.actualizar_usuario_obj(usuario_objetivo_obj)
         puts ">> ¡Usuario '#{username_objetivo}' ha sido DESBLOQUEADO por Admin (#{@usuario_actual.username})!"
       end
     else # En caso de que el usuario no exista en la base de datos
@@ -301,28 +292,29 @@ class ChatApp
   
   # --- NUEVO MENSAJE ---
   def manejar_nuevo_mensaje(texto_mensaje)
-    # Calcular nueva ID usando objetos en memoria
-    ultimo_mensaje_obj = @mensajes_objetos.last # Obtiene el último objeto Mensaje del array en memoria, o nil si está vacío
-
-    # Si hay un último mensaje (el array no estaba vacío),
-    # se toma su ID, se convierte a entero por seguridad, y suma +1.
-    # Si no hay último mensaje (el array estaba vacío), el nuevo ID es 1.
-    nueva_id = ultimo_mensaje_obj ? (ultimo_mensaje_obj.id.to_i + 1) : 1
-    
-    # Guarda la fecha y hora del mensaje
     timestamp = Time.now.strftime('%Y-%m-%d %H:%M:%S')
-    
-    # Crear objeto Mensaje
-    nuevo_mensaje_obj = Mensaje.new(
-      id: nueva_id, 
-      username: @usuario_actual.username, 
-      timestamp: timestamp, 
+
+    nuevo_mensaje_obj_temporal = Mensaje.new(
+      id: nil, # SQLite lo asignará
+      username: @usuario_actual.username,
+      timestamp: timestamp,
       texto: texto_mensaje
     )
-    
-    # Añadir a la lista en memoria y guardar en archivo
-    @mensajes_objetos << nuevo_mensaje_obj
-    guardar_mensajes_desde_objetos
-  end
 
+    nuevo_id_bd = @almacenamiento.agregar_mensaje_obj(nuevo_mensaje_obj_temporal)
+
+    if nuevo_id_bd
+      # Creamos el objeto final con el ID de la BD para la lista en memoria
+      nuevo_mensaje_con_id_real = Mensaje.new(
+        id: nuevo_id_bd,
+        username: nuevo_mensaje_obj_temporal.username,
+        timestamp: nuevo_mensaje_obj_temporal.timestamp,
+        texto: nuevo_mensaje_obj_temporal.texto
+      )
+      @mensajes_objetos << nuevo_mensaje_con_id_real # (con el objeto correcto)
+      # No es necesario llamar a guardar_mensajes_desde_objetos aquí, ya se guardó.
+    else
+      puts ">> Error: No se pudo guardar el mensaje."
+    end
+  end
 end # Fin de la clase ChatApp
