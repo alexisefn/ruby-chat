@@ -1,12 +1,14 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    colorize (1.1.0)
     sqlite3 (2.6.0-x64-mingw-ucrt)
 
 PLATFORMS
   x64-mingw-ucrt
 
 DEPENDENCIES
+  colorize
   sqlite3
 
 BUNDLED WITH
