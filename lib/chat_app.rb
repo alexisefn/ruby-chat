@@ -6,6 +6,7 @@ require_relative 'mensaje'
 
 require 'time'        # Para las marcas de tiempo
 require 'io/console'  # Para ocultar contraseñas al ingresarlas
+require 'colorize'    # Para dar colores a fuentes
 
 class ChatApp
   # --- CONSTANTES PARA COMANDOS ---
