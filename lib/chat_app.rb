@@ -3,10 +3,10 @@
 require_relative 'almacenamiento_db'
 require_relative 'usuario'
 require_relative 'mensaje'
+require_relative 'temas'
 
 require 'time'        # Para las marcas de tiempo
 require 'io/console'  # Para ocultar contraseñas al ingresarlas
-require 'colorize'    # Para dar colores a fuentes
 
 class ChatApp
   # --- CONSTANTES PARA COMANDOS ---
@@ -30,9 +30,9 @@ class ChatApp
 
   # Punto de entrada principal para ejecutar la aplicación
   def ejecutar
-    puts "-----------------------------------------------------"
-    puts "¡Bienvenido!"
-    puts "-----------------------------------------------------"
+    Temas.separador
+    Temas.banner("¡Bienvenido!")
+    Temas.separador
 
     # Llama al método privado de autenticación/registro
     iniciar_sesion_o_registrar
@@ -44,10 +44,10 @@ class ChatApp
     end
 
     # Si el login fue exitoso, iniciar el bucle principal
-    puts "-----------------------------------------------------"
+    Temas.separador
     puts "¡Hola: #{@usuario_actual.username}!"
     puts "Escribe tus mensajes o '/salir' para salir."
-    puts "-----------------------------------------------------"
+    Temas.separador
 
     # Llamar al bucle principal del chat
     main_loop
@@ -151,7 +151,7 @@ class ChatApp
   def main_loop
     loop do
       mostrar_mensajes_actuales
-      print "#{@usuario_actual.username}> "
+      Temas.prompt(@usuario_actual.username)
       texto = gets.chomp
       resultado = procesar_input(texto)
       break if resultado == :salir # Salir del loop si procesar_input lo indica
@@ -255,13 +255,13 @@ class ChatApp
     usuario_objetivo_obj = @usuarios_objetos.find { |usr| usr.username == username_objetivo }
     if usuario_objetivo_obj # En caso de que encuentre al usuario
       if usuario_objetivo_obj.es_admin?
-        puts ">> Error: No puedes bloquear a otro administrador."
+        Temas.error("No puedes bloquear a otro administrador.")
       elsif usuario_objetivo_obj.esta_bloqueado?
         puts ">> Info: El usuario '#{username_objetivo}' ya se encuentra bloqueado."
       else
         usuario_objetivo_obj.bloquear!
         @almacenamiento.actualizar_usuario_obj(usuario_objetivo_obj) #Guardar cambio en base de datos
-        puts ">> ¡Usuario '#{username_objetivo}' ha sido BLOQUEADO por Admin (#{@usuario_actual.username})!"
+        Temas.exito("¡Usuario '#{username_objetivo}' ha sido BLOQUEADO por Admin (#{@usuario_actual.username})!")
       end
     else # En caso de que el usuario no exista en la base de datos
       puts ">> Error: Usuario '#{username_objetivo}' no encontrado."

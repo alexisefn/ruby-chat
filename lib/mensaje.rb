@@ -1,5 +1,7 @@
 # 'lib/mensaje.rb'
 
+require_relative 'temas'
+
 class Mensaje
   # --- ATRIBUTOS ---
   # Los mensajes generalmente no cambian una vez creados,
@@ -20,7 +22,12 @@ class Mensaje
   # Esto es lo que se mostrará en la consola.
   # Ruby llama a .to_s automáticamente en muchos contextos (como en puts).
   def to_s
-    "##{@id} #{@timestamp} - #{@username}: #{@texto}"
+    id_str = Temas.formato_id(@id)
+    timestamp_str = Temas.formato_timestamp(@timestamp)
+    username_str = Temas.formato_usuario(@username)
+    texto_str = @texto
+
+    "#{id_str} #{timestamp_str} - #{username_str}: #{texto_str}"
   end
 
   # Método para convertir el objeto Mensaje de vuelta a un Hash
