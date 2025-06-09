@@ -39,7 +39,7 @@ class ChatApp
 
     # Salir si el inicio de sesión / registro falló (usuario bloqueado, pass incorrecta, etc.)
     unless @usuario_actual
-      puts "\nNo se pudo iniciar sesión o registrar. Adiós."
+      Temas.error("No se pudo iniciar sesión o registrar. Adiós.")
       return
     end
 
@@ -106,29 +106,32 @@ class ChatApp
     if usuario_encontrado
       puts "Usuario '#{username}' encontrado."
       if usuario_encontrado.esta_bloqueado?
-        puts "ACCESO DENEGADO: El usuario '#{username}' está bloqueado."; return
+        Temas.error("El usuario '#{username}' está bloqueado.")
+        return
       end
 
       print "Ingresa tu contraseña: "
       intento_password = STDIN.noecho(&:gets).chomp; puts
 
       if usuario_encontrado.autenticar(intento_password)
-        puts "Contraseña correcta. ¡Bienvenido de vuelta, #{username}!"
+        Temas.exito("Contraseña correcta. ¡Bienvenido de vuelta, #{username}!")
         @usuario_actual = usuario_encontrado # Asigna el OBJETO encontrado
       else
-        puts "ACCESO DENEGADO: Contraseña incorrecta."; return
+        Temas.error("Contraseña incorrecta.")
+        return
       end
     # Si no encuentra el Usuario, se le pedirá registrarse
     else
-      puts "Usuario nuevo '#{username}'. Creando cuenta..."
+      Temas.exito("Usuario nuevo '#{username}'. Creando cuenta...")
       password = ""
       loop do
         print "Crea una contraseña: "; password = STDIN.noecho(&:gets).chomp; puts
         print "Confirma la contraseña: "; confirmacion = STDIN.noecho(&:gets).chomp; puts
         if password == confirmacion && !password.empty?
-          puts "Contraseña creada."; break
+          Temas.exito("Contraseña creada.")
+          break
         else
-          puts "Las contraseñas no coinciden o están vacías. Inténtalo."
+          Temas.error("Las contraseñas no coinciden o están vacías. Inténtalo nuevamente.")
         end
       end
 
@@ -137,9 +140,9 @@ class ChatApp
       if @almacenamiento.agregar_usuario_obj(nuevo_usuario_obj)
         @usuarios_objetos << nuevo_usuario_obj # Añadir a la lista en memoria
         @usuario_actual = nuevo_usuario_obj
-        puts "¡Usuario '#{username}' registrado con éxito!" # 
+        Temas.exito("¡Usuario '#{username}' registrado con éxito!")
       else
-        puts "Error al registrar el usuario '#{username}'. Es posible que ya exista en la BD."
+        Temas.error("No se puede registrar el usuario '#{username}'. Es posible que el usuario ya exista.")
         # @usuario_actual permanecerá nil, y la app saldrá como antes.
       end
     end
@@ -157,21 +160,22 @@ class ChatApp
       break if resultado == :salir # Salir del loop si procesar_input lo indica
     end
   rescue Interrupt
-    puts "\n¡Adiós #{@usuario_actual.username}!" # Manejar Ctrl+C
+    Temas.info("El programa ha sido detenido.") # Manejar Ctrl+C
   ensure
+    puts "\n¡Adiós #{@usuario_actual.username}!"
     puts "\nCerrando chat..."
   end
 
   # Muestra los mensajes (recargando la lista de objetos)
   def mostrar_mensajes_actuales
      @mensajes_objetos = cargar_mensajes_como_objetos # Recargar para ver cambios
-     puts "\n--- Chat ---"
+     Temas.separador_chat("\n--- Chat ---")
       if @mensajes_objetos.empty?
         puts "No hay mensajes todavía."
       else
         @mensajes_objetos.each { |msg_obj| puts msg_obj } # Lista cada mensaje guardado
       end
-      puts "------------\n"
+      Temas.separador_chat("------------\n")
   end
   
   # Procesa el input del usuario, valida permisos y delega a los handlers
@@ -193,7 +197,7 @@ class ChatApp
     when COMANDO_BORRAR, COMANDO_BLOQUEAR, COMANDO_DESBLOQUEAR
       # Verificar si es Administrador
       unless @usuario_actual.es_admin?
-        puts ">> Error: No tienes permisos para usar el comando '#{comando_base}'."
+        Temas.error("No tienes permisos para usar el comando '#{comando_base}'.")
         return nil # Salir de procesar_input si no es admin
       end
       
@@ -223,7 +227,7 @@ class ChatApp
   def manejar_borrar(id_str) # Recibe el argumento (string del ID o nil)
     # Validar argumento primero
     if id_str.nil? || !id_str.match?(/^\d+$/)
-      puts ">> Error: Comando /borrar requiere un ID numérico. Uso: /borrar <id>"
+      Temas.error("Comando /borrar requere un ID numérico. Uso: /borrar <id>")
       return # Salir del método si el argumento es inválido
     end
     id_mensaje_borrar = id_str.to_i
@@ -232,9 +236,9 @@ class ChatApp
     if @almacenamiento.borrar_mensaje_por_id(id_mensaje_borrar)
       # Actualizar la lista en memoria
       @mensajes_objetos.reject! { |msg_obj| msg_obj.id == id_mensaje_borrar } # 
-      puts ">> Mensaje con ID #{id_mensaje_borrar} eliminado por Admin (#{@usuario_actual.username})."
+      Temas.exito("Mensaje con ID #{id_mensaje_borrar} eliminado por Admin (#{@usuario_actual.username}).")
     else
-      puts ">> Error: No se encontró mensaje con ID #{id_mensaje_borrar} o no se pudo borrar."
+      Temas.error("No se encontró mensaje con ID #{id_mensaje_borrar} o no se pudo borrar.")
     end
   end
 
@@ -242,13 +246,14 @@ class ChatApp
   def manejar_bloquear(username_objetivo) # Recibe el argumento (username o nil)
     # Validar argumento primero
     if username_objetivo.nil? || username_objetivo.empty? || username_objetivo.include?(' ')
-      puts ">> Error: Comando /bloquear requiere un nombre de usuario válido. Uso: /bloquear <username>"
+      Temas.error("Comando /bloquear requiere un nombre de usuario válido. Uso: /bloquear <username>")
       return
     end
     
     # Verificar que usuario a bloquear no sea uno mismo
     if username_objetivo == @usuario_actual.username
-      puts ">> Error: No puedes bloquearte a ti mismo."; return
+      Temas.error("No puedes bloquearte a ti mismo.")
+      return
     end
  
     # Busca el Usuario a bloquear en la base de datos
@@ -257,14 +262,14 @@ class ChatApp
       if usuario_objetivo_obj.es_admin?
         Temas.error("No puedes bloquear a otro administrador.")
       elsif usuario_objetivo_obj.esta_bloqueado?
-        puts ">> Info: El usuario '#{username_objetivo}' ya se encuentra bloqueado."
+        Temas.info("El usuario '#{username_objetivo}' ya se encuentra bloqueado.")
       else
         usuario_objetivo_obj.bloquear!
         @almacenamiento.actualizar_usuario_obj(usuario_objetivo_obj) #Guardar cambio en base de datos
         Temas.exito("¡Usuario '#{username_objetivo}' ha sido BLOQUEADO por Admin (#{@usuario_actual.username})!")
       end
     else # En caso de que el usuario no exista en la base de datos
-      puts ">> Error: Usuario '#{username_objetivo}' no encontrado."
+      Temas.error("Usuario '#{username_objetivo}' no encontrado.")
     end
   end
   
@@ -272,7 +277,7 @@ class ChatApp
   def manejar_desbloquear(username_objetivo) # Recibe el argumento (username o nil)
     # Validar argumento primero
     if username_objetivo.nil? || username_objetivo.empty? || username_objetivo.include?(' ')
-      puts ">> Error: Comando /desbloquear requiere un nombre de usuario válido. Uso: /desbloquear <username>"
+      Temas.error("Comando /desbloquear requiere un nombre de usuario válido. Uso: /desbloquear <username>")
       return
     end
     
@@ -280,14 +285,14 @@ class ChatApp
     usuario_objetivo_obj = @usuarios_objetos.find { |usr| usr.username == username_objetivo }
     if usuario_objetivo_obj
       if !usuario_objetivo_obj.esta_bloqueado?
-        puts ">> Info: El usuario '#{username_objetivo}' no está bloqueado."
+        Temas.info("El usuario '#{username_objetivo}' no está bloqueado.")
       else
         usuario_objetivo_obj.desbloquear!
         @almacenamiento.actualizar_usuario_obj(usuario_objetivo_obj)
-        puts ">> ¡Usuario '#{username_objetivo}' ha sido DESBLOQUEADO por Admin (#{@usuario_actual.username})!"
+        Temas.exito("¡Usuario '#{username_objetivo}' ha sido DESBLOQUEADO por Admin (#{@usuario_actual.username})!")
       end
     else # En caso de que el usuario no exista en la base de datos
-      puts ">> Error: Usuario '#{username_objetivo}' no encontrado."
+      Temas.error("Usuario '#{username_objetivo}' no encontrado.")
     end
   end
   
@@ -315,7 +320,7 @@ class ChatApp
       @mensajes_objetos << nuevo_mensaje_con_id_real # (con el objeto correcto)
       # No es necesario llamar a guardar_mensajes_desde_objetos aquí, ya se guardó.
     else
-      puts ">> Error: No se pudo guardar el mensaje."
+      Temas.error("No se pudo guardar el mensaje.")
     end
   end
 end # Fin de la clase ChatApp

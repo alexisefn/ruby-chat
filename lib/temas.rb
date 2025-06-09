@@ -8,7 +8,7 @@ module Temas
 
   # Imprime un mensaje de error en color rojo
   def self.error(texto)
-    puts ">> Error: #{texto}".colorize(:red)
+    puts ">> #{texto}".colorize(:red)
   end
 
   # Imprime un mensaje de éxito en color verde
@@ -18,17 +18,22 @@ module Temas
 
   # Imprime un mensaje informativo en color azul
   def self.info(texto)
-    puts ">> Info: #{texto}".colorize(:light_blue)
+    puts ">> #{texto}".colorize(:light_blue)
   end
   
   # Imprime un banner o título principal
   def self.banner(texto)
-    puts texto.colorize(color: :white, background: :blue)
+    puts texto.colorize(color: :white, background: :light_blue)
   end
 
   # Imprime un separador
   def self.separador
     puts "-----------------------------------------------------".colorize(:cyan)
+  end
+
+  # Separadores chat
+  def self.separador_chat(texto)
+    puts texto.colorize(color: :cyan)
   end
 
   # Imprime el prompt para el usuario
@@ -39,11 +44,11 @@ module Temas
   # --- Métodos que DEVUELVEN un string formateado (para el método to_s de Mensaje) ---
 
   def self.formato_id(id)
-    "##{id}".colorize(:light_black)
+    "##{id}".colorize(:white)
   end
   
   def self.formato_timestamp(timestamp)
-    timestamp.to_s.colorize(:light_black)
+    timestamp.to_s.colorize(:light_green)
   end
 
   def self.formato_usuario(username)
