@@ -39,4 +39,4 @@ class Mensaje
       "texto" => @texto
     }
   end
-end
+end # Fin de la clase Mensaje

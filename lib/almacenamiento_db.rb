@@ -126,4 +126,4 @@ class AlmacenamientoDB
     end
   end
 
-end # Fin de la clase AlmacenamientoJSON
+end # Fin de la clase AlmacenamientoDB

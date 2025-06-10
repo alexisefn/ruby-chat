@@ -54,4 +54,4 @@ class Usuario
       "bloqueado" => @bloqueado
     }
   end
-end
+end # Fin de la clase Usuario

@@ -54,4 +54,4 @@ module Temas
   def self.formato_usuario(username)
     username.colorize(:yellow)
   end
-end
+end # Fin de la clase Temas
