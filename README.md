@@ -52,6 +52,10 @@ Para probar esta aplicación:
     ```
     Podrás registrarte o iniciar sesión. Prueba los comandos de administrador (`/borrar`, `/bloquear`, `/desbloquear`) configurando un usuario como `es_admin = 1` en la base de datos `db/chat_app.sqlite3` (ej. con [DB Browser for SQLite](https://sqlitebrowser.org/)).
 
+### Muestra de programa
+
+![Muestra de programa](img/captura.jpg "Muestra de programa")
+
 ### Reflexiones y Próximos Pasos
 
 Este proyecto fue una valiosa experiencia para consolidar mis fundamentos en Ruby, especialmente en POO y persistencia de datos.
