@@ -54,7 +54,7 @@ Para probar esta aplicación:
 
 ### Muestra de programa
 
-![Muestra de programa](img/captura.jpg "Muestra de programa")
+![Muestra de programa](img/Captura.jpg "Muestra de programa")
 
 ### Reflexiones y Próximos Pasos
 
