@@ -1,6 +1,11 @@
 # Chat en Consola con Ruby
 
+![Ruby](https://img.shields.io/badge/Ruby-CC342D?style=for-the-badge&logo=ruby&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)
+
 Este proyecto es una aplicación de chat básica en consola desarrollada en Ruby. Su objetivo principal fue **aplicar y consolidar mis conocimientos en el lenguaje**, enfocándose en la Programación Orientada a Objetos (POO), el manejo de datos con SQLite (previamente JSON) y la modularización del código.
+
+---
 
 ### Conceptos Clave de Ruby Demostrados
 
@@ -32,6 +37,8 @@ A lo largo de este proyecto, he puesto en práctica y profundizado mi comprensi�
     * Organización del código en archivos y módulos (`require_relative`, `module Temas`) para promover la reutilización y la legibilidad.
     * Uso de constantes (`.freeze`) para valores inmutables.
 
+---
+
 ### Cómo Ejecutar el Proyecto
 
 Para probar esta aplicación:
@@ -52,9 +59,13 @@ Para probar esta aplicación:
     ```
     Podrás registrarte o iniciar sesión. Prueba los comandos de administrador (`/borrar`, `/bloquear`, `/desbloquear`) configurando un usuario como `es_admin = 1` en la base de datos `db/chat_app.sqlite3` (ej. con [DB Browser for SQLite](https://sqlitebrowser.org/)).
 
+---
+
 ### Muestra de programa
 
 ![Muestra](img/Captura.JPG)
+
+---
 
 ### Reflexiones y Próximos Pasos
 
