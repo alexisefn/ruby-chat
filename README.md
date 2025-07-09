@@ -61,9 +61,9 @@ Para probar esta aplicación:
 
 ---
 
-### Muestra de programa
+### Demostración
 
-![Muestra](img/Captura.JPG)
+![Demo](img/demo.gif)
 
 ---
 
