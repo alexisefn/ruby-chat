@@ -57,7 +57,8 @@ Para probar esta aplicación:
     ```bash
     ruby main.rb
     ```
-    Podrás registrarte o iniciar sesión. Prueba los comandos de administrador (`/borrar`, `/bloquear`, `/desbloquear`) configurando un usuario como `es_admin = 1` en la base de datos `db/chat_app.sqlite3` (ej. con [DB Browser for SQLite](https://sqlitebrowser.org/)).
+    Podrás registrarte o iniciar sesión. Prueba los comandos de administrador (`/borrar`, `/bloquear`, `/desbloquear`) iniciando como admin:
+    `usuario: admin / contraseña: admin`
 
 ---
 
